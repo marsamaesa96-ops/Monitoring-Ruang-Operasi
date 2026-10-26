@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring Ruang Operasi - Diagnostik Dasar</title>
+    <!-- Memuat Firebase SDK versi kompatibel -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { color: #333; font-size: 22px; }
+        .card-grid { display: flex; justify-content: space-around; margin: 20px 0; }
+        .card { background: #e3f2fd; padding: 20px; border-radius: 8px; width: 40%; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card h3 { margin: 0; color: #1565c0; font-size: 18px; }
+        .value { font-size: 32px; font-weight: bold; color: #0d47a1; margin: 10px 0; }
+        .status-box { padding: 15px; font-size: 20px; font-weight: bold; border-radius: 5px; margin-top: 20px; color: white; background: #9e9e9e; }
+        .time-box { margin-top: 15px; color: #666; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Monitoring Suhu & Kelembaban Ruang Operasi</h1>
+        <p>Permenkes No. 2 Tahun 2023</p>
+
+        <div class="card-grid">
+            <div class="card">
+                <h3>Suhu</h3>
+                <div class="value" id="val-suhu">--</div>
+                <span>&deg;C (Normal: 19-24)</span>
+            </div>
+            <div class="card">
+                <h3>Kelembaban</h3>
+                <div class="value" id="val-hum">--</div>
+                <span>%RH (Normal: 40-60)</span>
+            </div>
+        </div>
+
+        <div class="status-box" id="box-status">MEMUAT DATA...</div>
+        <div class="time-box">Waktu Sinkron: <span id="val-time">--</span></div>
+    </div>
+
+    <script>
+        // =================================================================
+        // MASUKKAN URL FIREBASE ANDA DI SINI
+        // =================================================================
+        const firebaseConfig = {
+            databaseURL: "https://diagnostik-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        };
+
+        // Inisialisasi Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Mengambil data secara Real-time dari Firebase
+        db.ref("Monitoring").on("value", (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                document.getElementById("val-suhu").innerText = (data.Suhu !== undefined) ? data.Suhu.toFixed(1) : "--";
+                document.getElementById("val-hum").innerText = (data.Kelembaban !== undefined) ? data.Kelembaban.toFixed(1) : "--";
+                
+                const statusTxt = data.Status || "TIDAK DIKETAHUI";
+                const statusBox = document.getElementById("box-status");
+                statusBox.innerText = statusTxt;
+
+                // Mengatur warna kotak berdasarkan status ruangan
+                if (statusTxt === "NORMAL") {
+                    statusBox.style.backgroundColor = "#2e7d32"; // Hijau
+                } else if (statusTxt.includes("TIDAK NORMAL")) {
+                    statusBox.style.backgroundColor = "#c62828"; // Merah
+                } else {
+                    statusBox.style.backgroundColor = "#ef6c00"; // Oranye
+                }
+
+                document.getElementById("val-time").innerText = data.Waktu || "--";
+            }
+        });
+    </script>
+</body>
+</html>
