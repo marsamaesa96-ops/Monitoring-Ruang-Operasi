@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cute Monitoring Ruang Operasi ✨</title>
+    <title>Monitoring Ruang Operasi - Aesthetic Dashboard 🧸</title>
 
     <!-- Google Fonts: Montserrat -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,27 +17,28 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* Palet Warna Berdasarkan Gambar Pilihan Anda */
+        /* Palet Warna Dari Gambar Baru Anda (@COLOR.BEARS) */
         :root {
-            --raspberry: #F2619C;
-            --lilac: #E7BEF8;
-            --blueberry: #93ABD9;
-            --lemon: #EDE986;
-            --bg-color: #FDF4F9;
+            --espresso: #3E2723;      /* Deep Espresso */
+            --petal: #F4C9D6;         /* Petal Reverie */
+            --ivory: #F5F0E6;         /* Ivory Hearth */
+            --bg-color: #FAF6F0;      /* Latar Halaman Soft */
             --card-bg: #FFFFFF;
-            --text-dark: #3F3D56;
-            --shadow: 0 10px 25px rgba(242, 97, 156, 0.15);
+            --normal-green: #2E7D32;
+            --danger-red: #D32F2F;
+            --shadow: 0 12px 28px rgba(62, 39, 35, 0.08);
         }
 
         * { box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 24px; }
+        body { background-color: var(--bg-color); color: var(--espresso); margin: 0; padding: 24px; }
         .container { max-width: 1050px; margin: 0 auto; }
 
-        /* Header Lucu & Estetik */
+        /* Header UI Imut & Elegan */
         .app-header {
-            background: linear-gradient(135deg, var(--blueberry), var(--lilac));
-            padding: 28px;
-            border-radius: 24px;
+            background: var(--espresso);
+            color: var(--ivory);
+            padding: 30px;
+            border-radius: 28px;
             box-shadow: var(--shadow);
             margin-bottom: 24px;
             display: flex;
@@ -45,50 +46,46 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 16px;
-            border: 4px solid #FFFFFF;
         }
-        .app-title h1 { margin: 0 0 6px 0; font-size: 22px; font-weight: 900; color: #FFFFFF; text-shadow: 1px 1px 3px rgba(0,0,0,0.1); }
-        .app-title p { margin: 0; font-size: 13px; color: #FFFFFF; font-weight: 600; }
+        .app-title h1 { margin: 0 0 6px 0; font-size: 22px; font-weight: 900; color: var(--petal); letter-spacing: 0.5px; }
+        .app-title p { margin: 0; font-size: 12px; color: var(--ivory); font-weight: 600; opacity: 0.9; }
 
         .hardware-selector {
-            background: #FFFFFF;
-            padding: 10px 18px;
-            border-radius: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            background: var(--petal);
+            padding: 10px 20px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
-            border: 3px solid var(--lemon);
         }
-        .hardware-selector label { font-size: 12px; font-weight: 800; color: var(--raspberry); }
+        .hardware-selector label { font-size: 12px; font-weight: 800; color: var(--espresso); }
         .hardware-selector select {
             background: transparent;
             border: none;
             font-size: 13px;
-            font-weight: 700;
-            color: var(--text-dark);
+            font-weight: 800;
+            color: var(--espresso);
             outline: none;
             cursor: pointer;
             font-family: 'Montserrat', sans-serif;
         }
 
-        /* Banner Status Interaktif */
+        /* Banner Status Utama */
         .status-banner {
             padding: 20px;
-            border-radius: 20px;
-            color: var(--text-dark);
+            border-radius: 22px;
+            color: var(--espresso);
             font-size: 18px;
-            font-weight: 800;
+            font-weight: 900;
             text-align: center;
             margin-bottom: 24px;
             box-shadow: var(--shadow);
-            background-color: var(--lemon);
-            border: 4px solid #FFFFFF;
+            background-color: var(--petal);
             letter-spacing: 0.5px;
             transition: all 0.3s ease;
         }
 
-        /* Kartu Suhu & Kelembaban (Cute Cards) */
+        /* Kartu Suhu & Kelembaban */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -96,82 +93,78 @@
             margin-bottom: 24px;
         }
         .metric-card {
-            background: var(--card-bg);
+            background: var(--ivory);
             padding: 28px;
-            border-radius: 24px;
+            border-radius: 26px;
             box-shadow: var(--shadow);
-            position: relative;
-            overflow: hidden;
-            border: 4px solid #FFFFFF;
+            border: 3px solid #FFFFFF;
+            transition: transform 0.2s;
         }
-        .metric-card.temp { background: linear-gradient(145deg, #FFFFFF, #FFF0F5); border-color: var(--raspberry); }
-        .metric-card.hum { background: linear-gradient(145deg, #FFFFFF, #F0F8FF); border-color: var(--blueberry); }
+        .metric-card:hover { transform: translateY(-4px); }
 
-        .metric-header h3 { margin: 0 0 10px 0; font-size: 14px; font-weight: 800; color: var(--raspberry); text-transform: uppercase; }
-        .metric-card.hum .metric-header h3 { color: #5171B8; }
-
-        .metric-value { font-size: 50px; font-weight: 900; color: var(--text-dark); margin-bottom: 8px; line-height: 1; }
-        .metric-unit { font-size: 22px; font-weight: 700; color: #888; }
-        .metric-range { font-size: 11px; font-weight: 700; background: #FFFFFF; padding: 6px 12px; border-radius: 10px; display: inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.05); color: #666; }
+        .metric-header h3 { margin: 0 0 12px 0; font-size: 14px; font-weight: 800; color: var(--espresso); text-transform: uppercase; letter-spacing: 0.5px; }
+        .metric-value { font-size: 52px; font-weight: 900; color: var(--espresso); margin-bottom: 10px; line-height: 1; }
+        .metric-unit { font-size: 22px; font-weight: 700; color: #795548; }
+        .metric-range { font-size: 11px; font-weight: 700; background: #FFFFFF; padding: 6px 14px; border-radius: 12px; display: inline-block; color: var(--espresso); }
 
         /* Panel Section (Grafik & Tabel) */
         .panel-section {
             background: var(--card-bg);
-            padding: 24px;
-            border-radius: 24px;
+            padding: 28px;
+            border-radius: 28px;
             box-shadow: var(--shadow);
             margin-bottom: 24px;
-            border: 4px solid #FFFFFF;
+            border: 3px solid var(--ivory);
         }
         .panel-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px dashed #F0F0F0;
+            padding-bottom: 14px;
+            border-bottom: 2px dashed var(--petal);
             flex-wrap: wrap;
             gap: 12px;
         }
-        .panel-header h2 { margin: 0; font-size: 16px; font-weight: 800; color: var(--raspberry); }
+        .panel-header h2 { margin: 0; font-size: 16px; font-weight: 800; color: var(--espresso); }
 
-        /* Tombol Download CSV Lucu */
+        /* Tombol Download CSV Espresso */
         .btn-export {
-            background-color: var(--raspberry);
-            color: white;
+            background-color: var(--espresso);
+            color: var(--petal);
             border: none;
-            padding: 10px 20px;
-            border-radius: 14px;
+            padding: 12px 22px;
+            border-radius: 18px;
             font-size: 12px;
             font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(242, 97, 156, 0.4);
+            box-shadow: 0 4px 15px rgba(62, 39, 35, 0.2);
             transition: transform 0.2s, background 0.2s;
             font-family: 'Montserrat', sans-serif;
         }
-        .btn-export:hover { background-color: #D94883; transform: scale(1.03); }
+        .btn-export:hover { background-color: #271815; transform: scale(1.03); }
 
-        /* Tabel Estetik */
+        /* Tabel Data Log */
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
-        th { background: #FAF5FA; color: var(--raspberry); font-weight: 800; padding: 14px; border-bottom: 2px solid #F0E6F0; border-radius: 8px; }
-        td { padding: 14px; border-bottom: 1.5px solid #F8F8F8; font-weight: 600; color: var(--text-dark); }
-        .status-tag { padding: 5px 12px; border-radius: 10px; font-size: 10px; font-weight: 900; color: #FFFFFF; display: inline-block; }
+        th { background: var(--ivory); color: var(--espresso); font-weight: 800; padding: 14px; border-bottom: 2px solid var(--petal); }
+        td { padding: 14px; border-bottom: 1px solid var(--ivory); font-weight: 600; color: var(--espresso); }
+        .status-tag { padding: 6px 14px; border-radius: 12px; font-size: 11px; font-weight: 800; color: #FFFFFF; display: inline-block; }
 
-        .sync-time { text-align: center; font-size: 12px; color: #888; font-weight: 700; margin-top: 15px; }
+        .sync-time { text-align: center; font-size: 12px; color: var(--espresso); font-weight: 700; opacity: 0.7; margin-top: 15px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Header Lucu -->
+        <!-- Header -->
         <div class="app-header">
             <div class="app-title">
-                <h1>🌸 Monitoring Ruang Operasi ✨</h1>
+                <h1>🧸 MONITORING RUANG OPERASI</h1>
                 <p>Standar Permenkes No. 2 Tahun 2023 (Suhu: 19–24°C | Kelembaban: 40–60%RH)</p>
             </div>
             <div class="hardware-selector">
-                <label for="nodeSelect">🎀 DEVICE:</label>
+                <label for="nodeSelect">⚡ DEVICE:</label>
                 <select id="nodeSelect" onchange="switchHardwareNode()">
                     <option value="Hardware_1">Ruang Operasi 1 (Utama)</option>
                     <option value="Hardware_2">Ruang Operasi 2 (Kel. 2)</option>
@@ -183,31 +176,31 @@
         </div>
 
         <!-- Banner Status -->
-        <div class="status-banner" id="statusBanner">✨ Menghubungkan ke System... ✨</div>
+        <div class="status-banner" id="statusBanner">🤎 Menghubungkan ke System... 🤎</div>
 
         <!-- Kartu Suhu & Kelembaban -->
         <div class="metrics-grid">
-            <div class="metric-card temp">
+            <div class="metric-card">
                 <div class="metric-header">
                     <h3>🌡️ Suhu Ruangan</h3>
                 </div>
                 <div class="metric-value"><span id="valSuhu">--</span> <span class="metric-unit">°C</span></div>
-                <div class="metric-range">Normal: 19.0°C – 24.0°C</div>
+                <div class="metric-range">Batas Normal: 19.0°C – 24.0°C</div>
             </div>
 
-            <div class="metric-card hum">
+            <div class="metric-card">
                 <div class="metric-header">
                     <h3>💧 Kelembaban Udara</h3>
                 </div>
                 <div class="metric-value"><span id="valHum">--</span> <span class="metric-unit">%RH</span></div>
-                <div class="metric-range">Normal: 40%RH – 60%RH</div>
+                <div class="metric-range">Batas Normal: 40%RH – 60%RH</div>
             </div>
         </div>
 
         <!-- Grafik 24 Jam -->
         <div class="panel-section">
             <div class="panel-header">
-                <h2>📈 Grafik Pemantauan Suhu & Kelembaban Harian (24 Jam)</h2>
+                <h2>📈 Grafik Pemantauan Harian (24 Jam)</h2>
             </div>
             <canvas id="chart24h" height="110"></canvas>
         </div>
@@ -229,13 +222,13 @@
                         </tr>
                     </thead>
                     <tbody id="logTableBody">
-                        <tr><td colspan="4" style="text-align: center; color: #888;">Memuat data dari database...</td></tr>
+                        <tr><td colspan="4" style="text-align: center; color: var(--espresso);">Memuat data dari database...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <div class="sync-time">💖 Terakhir Sinkron RTC: <span id="syncTime">--</span></div>
+        <div class="sync-time">✨ Terakhir Sinkron RTC: <span id="syncTime">--</span></div>
     </div>
 
     <script>
@@ -259,8 +252,8 @@
                     datasets: [
                         {
                             label: 'Suhu (°C)',
-                            borderColor: '#F2619C',
-                            backgroundColor: 'rgba(242, 97, 156, 0.1)',
+                            borderColor: '#3E2723',
+                            backgroundColor: 'rgba(62, 39, 35, 0.08)',
                             data: [],
                             fill: true,
                             tension: 0.4,
@@ -269,8 +262,8 @@
                         },
                         {
                             label: 'Kelembaban (%RH)',
-                            borderColor: '#93ABD9',
-                            backgroundColor: 'rgba(147, 171, 217, 0.1)',
+                            borderColor: '#F4C9D6',
+                            backgroundColor: 'rgba(244, 201, 214, 0.2)',
                             data: [],
                             fill: true,
                             tension: 0.4,
@@ -282,11 +275,11 @@
                 options: {
                     responsive: true,
                     plugins: {
-                        legend: { position: 'top', labels: { font: { family: 'Montserrat', weight: '700' } } }
+                        legend: { position: 'top', labels: { font: { family: 'Montserrat', weight: '800' } } }
                     },
                     scales: {
                         x: { grid: { display: false } },
-                        y: { grid: { color: '#FDF4F9' }, beginAtZero: false }
+                        y: { grid: { color: '#F5F0E6' }, beginAtZero: false }
                     }
                 }
             });
@@ -309,15 +302,17 @@
                     document.getElementById("syncTime").innerText = waktu;
 
                     const banner = document.getElementById("statusBanner");
-                    banner.innerText = "✨ " + status + " ✨";
+                    banner.innerText = status;
 
                     if (status === "NORMAL") {
-                        banner.style.backgroundColor = "#E7BEF8"; // Soft Lilac
+                        banner.style.backgroundColor = "var(--petal)";
+                        banner.style.color = "var(--espresso)";
                     } else if (status.includes("TIDAK NORMAL")) {
-                        banner.style.backgroundColor = "#F2619C"; // Raspberry Rose
+                        banner.style.backgroundColor = "#D32F2F";
                         banner.style.color = "#FFFFFF";
                     } else {
-                        banner.style.backgroundColor = "#EDE986"; // Lemon Cream
+                        banner.style.backgroundColor = "#F57C00";
+                        banner.style.color = "#FFFFFF";
                     }
 
                     if (data.Suhu !== undefined && data.Kelembaban !== undefined) {
@@ -346,7 +341,7 @@
                         const rowData = logs[key];
                         cachedLogData.push(rowData);
 
-                        let tagBg = rowData.Status === "NORMAL" ? "#93ABD9" : "#F2619C";
+                        let tagBg = rowData.Status === "NORMAL" ? "var(--espresso)" : "#D32F2F";
                         const tr = `<tr>
                             <td>${rowData.Waktu || '-'}</td>
                             <td>${rowData.Suhu ? rowData.Suhu.toFixed(1) : '-'}</td>
@@ -356,7 +351,7 @@
                         tbody.innerHTML += tr;
                     });
                 } else {
-                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: #888;">Belum ada log data terjadwal tersimpan.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--espresso);">Belum ada log data terjadwal tersimpan.</td></tr>`;
                 }
             });
         }
