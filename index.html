@@ -286,10 +286,10 @@
         }
 
         function attachFirebaseListeners(nodePath) {
-            db.ref("Monitoring").off();
-            db.ref("LogData").off();
+            db.ref(nodePath + "/Monitoring").off();
+            db.ref(nodePath + "/LogData").off();
 
-            db.ref("Monitoring").on("value", (snapshot) => {
+            db.ref(nodePath + "/Monitoring").on("value", (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     const suhu = (data.Suhu !== undefined) ? data.Suhu.toFixed(1) : "--";
@@ -330,7 +330,7 @@
                 }
             });
 
-            db.ref("LogData").on("value", (snapshot) => {
+            db.ref(nodePath + "/LogData").on("value", (snapshot) => {
                 const logs = snapshot.val();
                 const tbody = document.getElementById("logTableBody");
                 tbody.innerHTML = "";
