@@ -12,6 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -39,11 +40,16 @@
             color: var(--espresso);
         }
 
-        button, input, select {
+        button,
+        input,
+        select {
             font-family: "Montserrat", sans-serif;
         }
 
-        /* LOGIN */
+        /* =========================
+           LOGIN
+        ========================= */
+
         #loginScreen {
             min-height: calc(100vh - 48px);
             display: flex;
@@ -101,7 +107,7 @@
             outline: none;
             font-size: 14px;
             color: var(--espresso);
-            background: #fff;
+            background: white;
         }
 
         .form-group input:focus {
@@ -191,7 +197,10 @@
             line-height: 1.5;
         }
 
-        /* DASHBOARD */
+        /* =========================
+           DASHBOARD
+        ========================= */
+
         #dashboardApp {
             display: none;
         }
@@ -208,6 +217,7 @@
             border-radius: 28px;
             box-shadow: var(--shadow);
             margin-bottom: 24px;
+
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -240,6 +250,7 @@
             background: var(--petal);
             border-radius: 20px;
             padding: 10px 18px;
+
             display: flex;
             align-items: center;
             gap: 8px;
@@ -270,6 +281,10 @@
             cursor: pointer;
         }
 
+        /* =========================
+           STATUS
+        ========================= */
+
         .status-banner {
             padding: 20px;
             border-radius: 22px;
@@ -283,9 +298,13 @@
             transition: 0.3s;
         }
 
+        /* =========================
+           SENSOR CARD
+        ========================= */
+
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 24px;
             margin-bottom: 24px;
         }
@@ -325,6 +344,10 @@
             font-weight: 700;
         }
 
+        /* =========================
+           PANEL
+        ========================= */
+
         .panel {
             background: white;
             border: 3px solid var(--ivory);
@@ -351,7 +374,10 @@
             font-weight: 900;
         }
 
-        /* DUA GRAFIK */
+        /* =========================
+           DUA GRAFIK
+        ========================= */
+
         .chart-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -382,6 +408,10 @@
             text-align: center;
         }
 
+        /* =========================
+           EXPORT
+        ========================= */
+
         .btn-export {
             border: none;
             border-radius: 17px;
@@ -392,6 +422,10 @@
             font-weight: 900;
             cursor: pointer;
         }
+
+        /* =========================
+           TABLE
+        ========================= */
 
         .table-responsive {
             overflow-x: auto;
@@ -456,11 +490,21 @@
 
 <body>
 
-<section id="loginScreen">
-    <div class="login-card">
-        <div class="login-icon">🔐</div>
+<!-- =========================
+     LOGIN
+========================= -->
 
-        <h1>Login Monitoring</h1>
+<section id="loginScreen">
+
+    <div class="login-card">
+
+        <div class="login-icon">
+            🔐
+        </div>
+
+        <h1>
+            Login Monitoring
+        </h1>
 
         <p class="login-subtitle">
             Masuk untuk melihat dashboard monitoring suhu dan kelembaban ruang operasi.
@@ -469,7 +513,10 @@
         <form id="loginForm">
 
             <div class="form-group">
-                <label for="loginUsername">Username</label>
+
+                <label for="loginUsername">
+                    Username
+                </label>
 
                 <input
                     type="text"
@@ -479,8 +526,8 @@
                     maxlength="20"
                     required
                 >
-            </div>
 
+            </div>
 
             <div class="form-group">
 
@@ -511,7 +558,6 @@
 
             </div>
 
-
             <label class="human-check">
 
                 <input
@@ -525,7 +571,6 @@
 
             </label>
 
-
             <button
                 type="submit"
                 id="loginButton"
@@ -535,26 +580,32 @@
                 MASUK KE DASHBOARD
             </button>
 
-
             <div
                 id="loginError"
-                class="login-error">
+                class="login-error"
+            >
             </div>
 
         </form>
-
 
         <div class="login-note">
             Login diamankan menggunakan Firebase Authentication.
         </div>
 
     </div>
+
 </section>
 
 
 
-<div id="dashboardApp" class="container">
+<!-- =========================
+     DASHBOARD
+========================= -->
 
+<div
+    id="dashboardApp"
+    class="container"
+>
 
     <div class="app-header">
 
@@ -570,7 +621,6 @@
             </p>
 
         </div>
-
 
         <div class="header-controls">
 
@@ -609,7 +659,6 @@
 
             </div>
 
-
             <button
                 class="btn-logout"
                 onclick="logoutUser()"
@@ -634,6 +683,7 @@
 
     <div class="metrics-grid">
 
+        <!-- SUHU -->
 
         <div class="metric-card">
 
@@ -660,6 +710,8 @@
         </div>
 
 
+
+        <!-- KELEMBABAN -->
 
         <div class="metric-card">
 
@@ -689,6 +741,10 @@
 
 
 
+    <!-- =========================
+         GRAFIK
+    ========================= -->
+
     <div class="panel">
 
         <div class="panel-header">
@@ -703,29 +759,7 @@
         <div class="chart-grid">
 
 
-            <!-- KIRI: KELEMBAPAN -->
-
-            <div class="chart-box">
-
-                <h3>
-                    💧 Grafik Kelembapan
-                </h3>
-
-                <canvas
-                    id="humChart"
-                    height="190"
-                >
-                </canvas>
-
-                <div class="chart-note">
-                    Skala vertikal menyesuaikan otomatis dengan data terbaru
-                </div>
-
-            </div>
-
-
-
-            <!-- KANAN: SUHU -->
+            <!-- KIRI = SUHU -->
 
             <div class="chart-box">
 
@@ -746,18 +780,45 @@
             </div>
 
 
+
+            <!-- KANAN = KELEMBAPAN -->
+
+            <div class="chart-box">
+
+                <h3>
+                    💧 Grafik Kelembapan
+                </h3>
+
+                <canvas
+                    id="humChart"
+                    height="190"
+                >
+                </canvas>
+
+                <div class="chart-note">
+                    Skala vertikal menyesuaikan otomatis dengan data terbaru
+                </div>
+
+            </div>
+
+
         </div>
 
     </div>
 
 
 
+    <!-- =========================
+         LOG
+    ========================= -->
+
     <div class="panel">
 
         <div class="panel-header">
 
             <h2>
-                📋 Log Data Otomatis (07.00, 14.00, 21.00 WIB)
+                📋 Log Data Otomatis
+                (07.00, 14.00, 21.00 WIB)
             </h2>
 
             <button
@@ -798,7 +859,6 @@
 
                 </thead>
 
-
                 <tbody id="logTableBody">
 
                     <tr>
@@ -838,9 +898,9 @@
 
 <script>
 
-/* =====================================================
-   FIREBASE CONFIG
-===================================================== */
+/* =========================
+   FIREBASE
+========================= */
 
 const firebaseConfig = {
 
@@ -885,9 +945,9 @@ const db =
 
 
 
-/* =====================================================
-   LOGIN CONFIG
-===================================================== */
+/* =========================
+   LOGIN
+========================= */
 
 const LOGIN_USERNAME =
     "marnar";
@@ -898,9 +958,9 @@ const FIREBASE_LOGIN_EMAIL =
 
 
 
-/* =====================================================
-   GLOBAL VARIABLE
-===================================================== */
+/* =========================
+   GLOBAL
+========================= */
 
 let currentNode =
     "Hardware_1";
@@ -927,9 +987,9 @@ let activeLogRef =
 
 
 
-/* =====================================================
-   ELEMENT LOGIN
-===================================================== */
+/* =========================
+   LOGIN ELEMENT
+========================= */
 
 const loginScreen =
     document.getElementById(
@@ -986,9 +1046,9 @@ const loginError =
 
 
 
-/* =====================================================
-   LIHAT / SEMBUNYIKAN PASSWORD
-===================================================== */
+/* =========================
+   PASSWORD EYE
+========================= */
 
 togglePassword.addEventListener(
 
@@ -997,8 +1057,7 @@ togglePassword.addEventListener(
     function () {
 
         if (
-            loginPassword.type
-            ===
+            loginPassword.type ===
             "password"
         ) {
 
@@ -1032,9 +1091,9 @@ togglePassword.addEventListener(
 
 
 
-/* =====================================================
+/* =========================
    CHECKBOX
-===================================================== */
+========================= */
 
 humanCheck.addEventListener(
 
@@ -1054,9 +1113,9 @@ humanCheck.addEventListener(
 
 
 
-/* =====================================================
-   LOGIN
-===================================================== */
+/* =========================
+   LOGIN SUBMIT
+========================= */
 
 loginForm.addEventListener(
 
@@ -1076,7 +1135,6 @@ loginForm.addEventListener(
         ) {
 
             loginError.innerText =
-
                 'Centang "Saya bukan robot" terlebih dahulu.';
 
             return;
@@ -1140,46 +1198,34 @@ loginForm.addEventListener(
         catch (error) {
 
             console.error(
-
                 "LOGIN ERROR:",
-
                 error
-
             );
 
 
             if (
-
                 error.code ===
                 "auth/too-many-requests"
-
             ) {
 
                 loginError.innerText =
-
                     "Terlalu banyak percobaan login. Coba kembali nanti.";
 
             }
 
-
             else if (
-
                 error.code ===
                 "auth/unauthorized-domain"
-
             ) {
 
                 loginError.innerText =
-
                     "Domain website belum diizinkan pada Firebase Authentication.";
 
             }
 
-
             else {
 
                 loginError.innerText =
-
                     "Username atau password salah.";
 
             }
@@ -1208,9 +1254,9 @@ loginForm.addEventListener(
 
 
 
-/* =====================================================
+/* =========================
    LOGOUT
-===================================================== */
+========================= */
 
 function logoutUser() {
 
@@ -1220,9 +1266,9 @@ function logoutUser() {
 
 
 
-/* =====================================================
-   FUNGSI SKALA OTOMATIS
-===================================================== */
+/* =========================
+   AUTO SCALE HELPER
+========================= */
 
 function roundDown(
     value,
@@ -1257,10 +1303,9 @@ function roundUp(
 
 
 
-/*
-Skala berubah mengikuti
-data yang sedang tampil di grafik.
-*/
+/* =========================
+   AUTO SCALE
+========================= */
 
 function getAutoScale(
     values,
@@ -1270,22 +1315,14 @@ function getAutoScale(
     const valid =
 
         values
-        .map(
-            Number
-        )
+        .map(Number)
         .filter(
 
             value =>
-                Number.isFinite(
-                    value
-                )
+                Number.isFinite(value)
 
         );
 
-
-    /*
-    DEFAULT sebelum ada data
-    */
 
     if (
         valid.length === 0
@@ -1296,78 +1333,47 @@ function getAutoScale(
         ) {
 
             return {
-
-                min:
-                    18,
-
-                max:
-                    32,
-
-                step:
-                    1
-
+                min: 18,
+                max: 32,
+                step: 1
             };
 
         }
 
 
         return {
-
-            min:
-                30,
-
-            max:
-                90,
-
-            step:
-                5
-
+            min: 30,
+            max: 90,
+            step: 5
         };
 
     }
 
 
-
     const minValue =
-        Math.min(
-            ...valid
-        );
+        Math.min(...valid);
 
 
     const maxValue =
-        Math.max(
-            ...valid
-        );
+        Math.max(...valid);
 
 
     const range =
-
-        maxValue
-        -
-        minValue;
+        maxValue - minValue;
 
 
 
-    /* =================================================
+    /* =========================
        SUHU
-    ================================================= */
+    ========================= */
 
     if (
-        type ===
-        "temp"
+        type === "temp"
     ) {
 
-
         let padding;
-
         let step;
 
-
-
-        /*
-        Bila suhu hampir datar,
-        grafik dibuat lebih detail.
-        */
 
         if (
             range < 0.8
@@ -1387,17 +1393,10 @@ function getAutoScale(
         ) {
 
             padding =
-
                 Math.max(
-
                     0.8,
-
-                    range
-                    *
-                    0.25
-
+                    range * 0.25
                 );
-
 
             step =
                 0.5;
@@ -1408,17 +1407,10 @@ function getAutoScale(
         else {
 
             padding =
-
                 Math.max(
-
                     1.0,
-
-                    range
-                    *
-                    0.20
-
+                    range * 0.20
                 );
-
 
             step =
                 1.0;
@@ -1426,49 +1418,29 @@ function getAutoScale(
         }
 
 
-
         let min =
 
             roundDown(
-
-                minValue
-                -
-                padding,
-
+                minValue - padding,
                 step
-
             );
 
 
         let max =
 
             roundUp(
-
-                maxValue
-                +
-                padding,
-
+                maxValue + padding,
                 step
-
             );
 
-
-
-        /*
-        Minimal lebar grafik suhu
-        sekitar 2°C.
-        */
 
         if (
             max - min < 2
         ) {
 
-
             const center =
-
                 (
-                    maxValue
-                    +
+                    maxValue +
                     minValue
                 )
                 /
@@ -1476,60 +1448,37 @@ function getAutoScale(
 
 
             min =
-
                 roundDown(
-
-                    center
-                    -
-                    1,
-
+                    center - 1,
                     step
-
                 );
 
 
             max =
-
                 roundUp(
-
-                    center
-                    +
-                    1,
-
+                    center + 1,
                     step
-
                 );
 
         }
 
 
-
         return {
-
-            min:
-                min,
-
-            max:
-                max,
-
-            step:
-                step
-
+            min: min,
+            max: max,
+            step: step
         };
 
     }
 
 
 
-    /* =================================================
+    /* =========================
        KELEMBAPAN
-    ================================================= */
-
+    ========================= */
 
     let padding;
-
     let step;
-
 
 
     if (
@@ -1550,17 +1499,10 @@ function getAutoScale(
     ) {
 
         padding =
-
             Math.max(
-
                 3,
-
-                range
-                *
-                0.20
-
+                range * 0.20
             );
-
 
         step =
             2;
@@ -1571,17 +1513,10 @@ function getAutoScale(
     else {
 
         padding =
-
             Math.max(
-
                 5,
-
-                range
-                *
-                0.15
-
+                range * 0.15
             );
-
 
         step =
             5;
@@ -1589,32 +1524,20 @@ function getAutoScale(
     }
 
 
-
     let min =
 
         roundDown(
-
-            minValue
-            -
-            padding,
-
+            minValue - padding,
             step
-
         );
 
 
     let max =
 
         roundUp(
-
-            maxValue
-            +
-            padding,
-
+            maxValue + padding,
             step
-
         );
-
 
 
     min =
@@ -1631,17 +1554,13 @@ function getAutoScale(
         );
 
 
-
     if (
         max - min < 6
     ) {
 
-
         const center =
-
             (
-                maxValue
-                +
+                maxValue +
                 minValue
             )
             /
@@ -1649,38 +1568,26 @@ function getAutoScale(
 
 
         min =
-
             Math.max(
 
                 0,
 
                 roundDown(
-
-                    center
-                    -
-                    3,
-
+                    center - 3,
                     step
-
                 )
 
             );
 
 
         max =
-
             Math.min(
 
                 100,
 
                 roundUp(
-
-                    center
-                    +
-                    3,
-
+                    center + 3,
                     step
-
                 )
 
             );
@@ -1688,36 +1595,26 @@ function getAutoScale(
     }
 
 
-
     return {
-
-        min:
-            min,
-
-        max:
-            max,
-
-        step:
-            step
-
+        min: min,
+        max: max,
+        step: step
     };
 
 }
 
 
 
-/* =====================================================
-   UPDATE SKALA SUHU
-===================================================== */
+/* =========================
+   UPDATE SUHU SCALE
+========================= */
 
 function updateTempScale() {
 
     if (
         !tempChart
     ) {
-
         return;
-
     }
 
 
@@ -1735,49 +1632,31 @@ function updateTempScale() {
         );
 
 
-    tempChart
-    .options
-    .scales
-    .y
-    .min =
-
+    tempChart.options.scales.y.min =
         scale.min;
 
 
-    tempChart
-    .options
-    .scales
-    .y
-    .max =
-
+    tempChart.options.scales.y.max =
         scale.max;
 
 
-    tempChart
-    .options
-    .scales
-    .y
-    .ticks
-    .stepSize =
-
+    tempChart.options.scales.y.ticks.stepSize =
         scale.step;
 
 }
 
 
 
-/* =====================================================
-   UPDATE SKALA KELEMBAPAN
-===================================================== */
+/* =========================
+   UPDATE HUM SCALE
+========================= */
 
 function updateHumScale() {
 
     if (
         !humChart
     ) {
-
         return;
-
     }
 
 
@@ -1795,270 +1674,38 @@ function updateHumScale() {
         );
 
 
-    humChart
-    .options
-    .scales
-    .y
-    .min =
-
+    humChart.options.scales.y.min =
         scale.min;
 
 
-    humChart
-    .options
-    .scales
-    .y
-    .max =
-
+    humChart.options.scales.y.max =
         scale.max;
 
 
-    humChart
-    .options
-    .scales
-    .y
-    .ticks
-    .stepSize =
-
+    humChart.options.scales.y.ticks.stepSize =
         scale.step;
 
 }
 
 
 
-/* =====================================================
-   CHART
-===================================================== */
+/* =========================
+   INIT CHART
+========================= */
 
 function initChart() {
 
-
     if (
-
-        tempChart
-
-        &&
-
+        tempChart &&
         humChart
-
     ) {
-
         return;
-
     }
 
 
-
-    /* =================================================
-       KIRI - KELEMBAPAN
-    ================================================= */
-
-
-    const humCtx =
-
-        document
-        .getElementById(
-            "humChart"
-        )
-        .getContext(
-            "2d"
-        );
-
-
-
-    humChart =
-
-        new Chart(
-
-            humCtx,
-
-            {
-
-
-                type:
-                    "line",
-
-
-                data: {
-
-
-                    labels:
-                        [],
-
-
-                    datasets: [
-
-                        {
-
-                            label:
-
-                                "Kelembapan (%RH)",
-
-
-                            data:
-                                [],
-
-
-                            borderColor:
-
-                                "#F4C9D6",
-
-
-                            backgroundColor:
-
-                                "rgba(244,201,214,0.24)",
-
-
-                            fill:
-                                true,
-
-
-                            tension:
-                                0.35,
-
-
-                            borderWidth:
-                                3,
-
-
-                            pointRadius:
-                                3,
-
-
-                            pointHoverRadius:
-                                5
-
-                        }
-
-                    ]
-
-                },
-
-
-
-                options: {
-
-
-                    responsive:
-                        true,
-
-
-                    maintainAspectRatio:
-                        true,
-
-
-                    interaction: {
-
-                        mode:
-                            "index",
-
-                        intersect:
-                            false
-
-                    },
-
-
-                    plugins: {
-
-
-                        legend: {
-
-                            display:
-                                true,
-
-                            position:
-                                "top"
-
-                        }
-
-                    },
-
-
-                    scales: {
-
-
-                        x: {
-
-
-                            grid: {
-
-                                display:
-                                    false
-
-                            },
-
-
-                            ticks: {
-
-                                maxRotation:
-                                    0,
-
-                                autoSkip:
-                                    true,
-
-                                maxTicksLimit:
-                                    6
-
-                            }
-
-                        },
-
-
-                        y: {
-
-
-                            min:
-                                30,
-
-
-                            max:
-                                90,
-
-
-                            ticks: {
-
-
-                                stepSize:
-                                    5,
-
-
-                                callback:
-
-                                    function (
-                                        value
-                                    ) {
-
-                                        return (
-
-                                            Number(
-                                                value
-                                            )
-                                            .toFixed(
-                                                0
-                                            )
-
-                                        );
-
-                                    }
-
-                            }
-
-                        }
-
-                    }
-
-                }
-
-            }
-
-        );
-
-
-
-    /* =================================================
-       KANAN - SUHU
-    ================================================= */
-
+    /* =========================
+       KIRI = SUHU
+    ========================= */
 
     const tempCtx =
 
@@ -2071,7 +1718,6 @@ function initChart() {
         );
 
 
-
     tempChart =
 
         new Chart(
@@ -2080,56 +1726,40 @@ function initChart() {
 
             {
 
-
                 type:
                     "line",
 
-
                 data: {
 
-
-                    labels:
-                        [],
-
+                    labels: [],
 
                     datasets: [
 
                         {
 
                             label:
-
                                 "Suhu (°C)",
-
 
                             data:
                                 [],
 
-
                             borderColor:
-
                                 "#3E2723",
 
-
                             backgroundColor:
-
                                 "rgba(62,39,35,0.10)",
-
 
                             fill:
                                 true,
 
-
                             tension:
                                 0.35,
-
 
                             borderWidth:
                                 3,
 
-
                             pointRadius:
                                 3,
-
 
                             pointHoverRadius:
                                 5
@@ -2141,17 +1771,13 @@ function initChart() {
                 },
 
 
-
                 options: {
-
 
                     responsive:
                         true,
 
-
                     maintainAspectRatio:
                         true,
-
 
                     interaction: {
 
@@ -2165,7 +1791,6 @@ function initChart() {
 
 
                     plugins: {
-
 
                         legend: {
 
@@ -2182,17 +1807,11 @@ function initChart() {
 
                     scales: {
 
-
                         x: {
 
-
                             grid: {
-
-                                display:
-                                    false
-
+                                display: false
                             },
-
 
                             ticks: {
 
@@ -2212,55 +1831,202 @@ function initChart() {
 
                         y: {
 
-
                             min:
                                 18,
-
 
                             max:
                                 32,
 
-
                             ticks: {
-
 
                                 stepSize:
                                     1,
 
-
                                 callback:
 
-                                    function (
-                                        value
-                                    ) {
-
+                                    function (value) {
 
                                         const n =
-
-                                            Number(
-                                                value
-                                            );
+                                            Number(value);
 
 
                                         return (
 
                                             Number
-                                            .isInteger(
-                                                n
-                                            )
+                                            .isInteger(n)
 
                                             ?
 
-                                            n.toFixed(
-                                                0
-                                            )
+                                            n.toFixed(0)
 
                                             :
 
-                                            n.toFixed(
-                                                1
-                                            )
+                                            n.toFixed(1)
 
+                                        );
+
+                                    }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        );
+
+
+
+    /* =========================
+       KANAN = KELEMBAPAN
+    ========================= */
+
+    const humCtx =
+
+        document
+        .getElementById(
+            "humChart"
+        )
+        .getContext(
+            "2d"
+        );
+
+
+    humChart =
+
+        new Chart(
+
+            humCtx,
+
+            {
+
+                type:
+                    "line",
+
+                data: {
+
+                    labels: [],
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                "Kelembaban (%RH)",
+
+                            data:
+                                [],
+
+                            borderColor:
+                                "#F4C9D6",
+
+                            backgroundColor:
+                                "rgba(244,201,214,0.24)",
+
+                            fill:
+                                true,
+
+                            tension:
+                                0.35,
+
+                            borderWidth:
+                                3,
+
+                            pointRadius:
+                                3,
+
+                            pointHoverRadius:
+                                5
+
+                        }
+
+                    ]
+
+                },
+
+
+                options: {
+
+                    responsive:
+                        true,
+
+                    maintainAspectRatio:
+                        true,
+
+                    interaction: {
+
+                        mode:
+                            "index",
+
+                        intersect:
+                            false
+
+                    },
+
+
+                    plugins: {
+
+                        legend: {
+
+                            display:
+                                true,
+
+                            position:
+                                "top"
+
+                        }
+
+                    },
+
+
+                    scales: {
+
+                        x: {
+
+                            grid: {
+                                display: false
+                            },
+
+                            ticks: {
+
+                                maxRotation:
+                                    0,
+
+                                autoSkip:
+                                    true,
+
+                                maxTicksLimit:
+                                    6
+
+                            }
+
+                        },
+
+
+                        y: {
+
+                            min:
+                                30,
+
+                            max:
+                                90,
+
+                            ticks: {
+
+                                stepSize:
+                                    5,
+
+                                callback:
+
+                                    function (value) {
+
+                                        return (
+                                            Number(value)
+                                            .toFixed(0)
                                         );
 
                                     }
@@ -2281,14 +2047,13 @@ function initChart() {
 
 
 
-/* =====================================================
-   TAMPILAN MENUNGGU
-===================================================== */
+/* =========================
+   WAITING
+========================= */
 
 function setDashboardWaiting(
     nodePath
 ) {
-
 
     document
     .getElementById(
@@ -2331,30 +2096,25 @@ function setDashboardWaiting(
         "...";
 
 
-    banner.style
-    .backgroundColor =
-
+    banner.style.backgroundColor =
         "var(--petal)";
 
 
-    banner.style
-    .color =
-
+    banner.style.color =
         "var(--espresso)";
 
 }
 
 
 
-/* =====================================================
+/* =========================
    FIREBASE REALTIME
-===================================================== */
+========================= */
 
 function attachFirebaseListeners(
     nodePath
 ) {
 
-
     if (
         activeMonitoringRef
     ) {
@@ -2373,7 +2133,6 @@ function attachFirebaseListeners(
         .off();
 
     }
-
 
 
     setDashboardWaiting(
@@ -2381,141 +2140,94 @@ function attachFirebaseListeners(
     );
 
 
-
     activeMonitoringRef =
 
         db.ref(
-
-            nodePath
-            +
+            nodePath +
             "/Monitoring"
-
         );
-
 
 
     activeLogRef =
 
         db.ref(
-
-            nodePath
-            +
+            nodePath +
             "/LogData"
-
         );
 
 
 
-    /* =================================================
-       DATA MONITORING
-    ================================================= */
-
+    /* =========================
+       MONITORING
+    ========================= */
 
     activeMonitoringRef.on(
 
         "value",
 
-        function (
-            snapshot
-        ) {
-
+        function (snapshot) {
 
             const data =
-
                 snapshot.val();
-
 
 
             if (
                 !data
             ) {
 
-
                 setDashboardWaiting(
                     nodePath
                 );
-
 
                 return;
 
             }
 
 
-
             const suhu =
 
-
-                data.Suhu !== undefined
-
-                &&
-
+                data.Suhu !== undefined &&
                 data.Suhu !== null
 
-
                 ?
-
 
                 Number(
                     data.Suhu
                 )
-                .toFixed(
-                    1
-                )
-
+                .toFixed(1)
 
                 :
 
-
                 "--";
-
 
 
             const hum =
 
-
-                data.Kelembaban !== undefined
-
-                &&
-
+                data.Kelembaban !== undefined &&
                 data.Kelembaban !== null
 
-
                 ?
-
 
                 Number(
                     data.Kelembaban
                 )
-                .toFixed(
-                    1
-                )
-
+                .toFixed(1)
 
                 :
 
-
                 "--";
-
 
 
             const status =
 
-                data.Status
-
-                ||
-
+                data.Status ||
                 "MEMBACA SENSOR...";
-
 
 
             const waktu =
 
-                data.Waktu
-
-                ||
-
+                data.Waktu ||
                 "--";
-
 
 
             document
@@ -2523,9 +2235,7 @@ function attachFirebaseListeners(
                 "valSuhu"
             )
             .innerText =
-
                 suhu;
-
 
 
             document
@@ -2533,9 +2243,7 @@ function attachFirebaseListeners(
                 "valHum"
             )
             .innerText =
-
                 hum;
-
 
 
             document
@@ -2543,9 +2251,7 @@ function attachFirebaseListeners(
                 "syncTime"
             )
             .innerText =
-
                 waktu;
-
 
 
             const banner =
@@ -2560,113 +2266,70 @@ function attachFirebaseListeners(
                 status;
 
 
-
             if (
-                status ===
-                "NORMAL"
+                status === "NORMAL"
             ) {
 
-
-                banner.style
-                .backgroundColor =
-
+                banner.style.backgroundColor =
                     "var(--green)";
 
-
-                banner.style
-                .color =
-
+                banner.style.color =
                     "#FFFFFF";
 
             }
 
-
             else if (
-
                 status.includes(
                     "TIDAK NORMAL"
                 )
-
             ) {
 
-
-                banner.style
-                .backgroundColor =
-
+                banner.style.backgroundColor =
                     "var(--red)";
 
-
-                banner.style
-                .color =
-
+                banner.style.color =
                     "#FFFFFF";
 
             }
-
 
             else if (
-
                 status ===
                 "SENSOR ERROR"
-
             ) {
 
-
-                banner.style
-                .backgroundColor =
-
+                banner.style.backgroundColor =
                     "#8E24AA";
 
-
-                banner.style
-                .color =
-
+                banner.style.color =
                     "#FFFFFF";
 
             }
-
 
             else {
 
-
-                banner.style
-                .backgroundColor =
-
+                banner.style.backgroundColor =
                     "var(--orange)";
 
-
-                banner.style
-                .color =
-
+                banner.style.color =
                     "#FFFFFF";
 
             }
 
 
 
-            /* =================================================
-               GRAFIK REALTIME
-            ================================================= */
-
+            /* =========================
+               UPDATE GRAFIK
+            ========================= */
 
             if (
 
-                data.Suhu !== undefined
+                data.Suhu !== undefined &&
+                data.Suhu !== null &&
 
-                &&
-
-                data.Suhu !== null
-
-                &&
-
-                data.Kelembaban !== undefined
-
-                &&
-
+                data.Kelembaban !== undefined &&
                 data.Kelembaban !== null
 
             ) {
-
 
                 let timeOnly =
 
@@ -2691,35 +2354,22 @@ function attachFirebaseListeners(
                     );
 
 
-
                 if (
-
-                    waktu
-
-                    &&
-
+                    waktu &&
                     waktu !== "--"
-
                 ) {
-
 
                     const parts =
 
-                        String(
-                            waktu
-                        )
-                        .split(
-                            " "
-                        );
+                        String(waktu)
+                        .split(" ");
 
 
                     if (
                         parts.length > 1
                     ) {
 
-
                         timeOnly =
-
                             parts[1];
 
                     }
@@ -2728,24 +2378,14 @@ function attachFirebaseListeners(
 
 
 
-                /*
-                MAKSIMAL 24 TITIK
-                */
-
+                /* MAKS 24 TITIK */
 
                 if (
-
                     tempChart
                     .data
                     .labels
-                    .length
-
-                    >=
-
-                    24
-
+                    .length >= 24
                 ) {
-
 
                     tempChart
                     .data
@@ -2762,20 +2402,12 @@ function attachFirebaseListeners(
                 }
 
 
-
                 if (
-
                     humChart
                     .data
                     .labels
-                    .length
-
-                    >=
-
-                    24
-
+                    .length >= 24
                 ) {
-
 
                     humChart
                     .data
@@ -2793,8 +2425,7 @@ function attachFirebaseListeners(
 
 
 
-                /* SUHU */
-
+                /* SUHU KIRI */
 
                 tempChart
                 .data
@@ -2818,8 +2449,7 @@ function attachFirebaseListeners(
 
 
 
-                /* KELEMBAPAN */
-
+                /* KELEMBAPAN KANAN */
 
                 humChart
                 .data
@@ -2843,33 +2473,17 @@ function attachFirebaseListeners(
 
 
 
-                /*
-                SKALA OTOMATIS
-                */
-
-
                 updateTempScale();
-
 
                 updateHumScale();
 
 
-
-                /*
-                update("none")
-                agar realtime tidak terlalu
-                banyak animasi
-                */
-
-
-                tempChart
-                .update(
+                tempChart.update(
                     "none"
                 );
 
 
-                humChart
-                .update(
+                humChart.update(
                     "none"
                 );
 
@@ -2878,18 +2492,11 @@ function attachFirebaseListeners(
         },
 
 
-
-        function (
-            error
-        ) {
-
+        function (error) {
 
             console.error(
-
                 "Firebase Monitoring:",
-
                 error
-
             );
 
 
@@ -2902,20 +2509,15 @@ function attachFirebaseListeners(
 
 
             banner.innerText =
-
                 "GAGAL MEMBACA FIREBASE";
 
 
-            banner.style
-                .backgroundColor =
-
-                    "var(--red)";
+            banner.style.backgroundColor =
+                "var(--red)";
 
 
-            banner.style
-                .color =
-
-                    "#FFFFFF";
+            banner.style.color =
+                "#FFFFFF";
 
         }
 
@@ -2923,22 +2525,17 @@ function attachFirebaseListeners(
 
 
 
-    /* =================================================
+    /* =========================
        LOG DATA
-    ================================================= */
-
+    ========================= */
 
     activeLogRef.on(
 
         "value",
 
-        function (
-            snapshot
-        ) {
-
+        function (snapshot) {
 
             const logs =
-
                 snapshot.val();
 
 
@@ -2958,31 +2555,18 @@ function attachFirebaseListeners(
                 [];
 
 
-
             if (
                 logs
             ) {
 
-
                 Object
-                .keys(
-                    logs
-                )
+                .keys(logs)
                 .forEach(
 
-                    function (
-                        key
-                    ) {
-
+                    function (key) {
 
                         const rowData =
-
-                            logs[key]
-
-                            ||
-
-                            {};
-
+                            logs[key] || {};
 
 
                         cachedLogData
@@ -2991,81 +2575,52 @@ function attachFirebaseListeners(
                         );
 
 
-
                         const suhuLog =
 
-
-                            rowData.Suhu !== undefined
-
-                            &&
-
+                            rowData.Suhu !== undefined &&
                             rowData.Suhu !== null
 
-
                             ?
-
 
                             Number(
                                 rowData.Suhu
                             )
-                            .toFixed(
-                                1
-                            )
-
+                            .toFixed(1)
 
                             :
 
-
                             "-";
-
 
 
                         const humLog =
 
-
-                            rowData.Kelembaban !== undefined
-
-                            &&
-
+                            rowData.Kelembaban !== undefined &&
                             rowData.Kelembaban !== null
 
-
                             ?
-
 
                             Number(
                                 rowData.Kelembaban
                             )
-                            .toFixed(
-                                1
-                            )
-
+                            .toFixed(1)
 
                             :
-
 
                             "-";
 
 
-
                         const tagColor =
-
 
                             rowData.Status ===
                             "NORMAL"
 
-
                             ?
-
 
                             "var(--green)"
 
-
                             :
 
-
                             "var(--red)";
-
 
 
                         tbody.innerHTML += `
@@ -3094,13 +2649,11 @@ function attachFirebaseListeners(
                                         class="status-tag"
                                         style="background:${tagColor}"
                                     >
-
                                         ${
                                             rowData.Status
                                             ||
                                             "-"
                                         }
-
                                     </span>
 
                                 </td>
@@ -3115,9 +2668,7 @@ function attachFirebaseListeners(
 
             }
 
-
             else {
-
 
                 tbody.innerHTML = `
 
@@ -3127,9 +2678,7 @@ function attachFirebaseListeners(
                             colspan="4"
                             style="text-align:center"
                         >
-
                             Belum ada log data terjadwal tersimpan.
-
                         </td>
 
                     </tr>
@@ -3141,18 +2690,11 @@ function attachFirebaseListeners(
         },
 
 
-
-        function (
-            error
-        ) {
-
+        function (error) {
 
             console.error(
-
                 "Firebase LogData:",
-
                 error
-
             );
 
         }
@@ -3163,21 +2705,17 @@ function attachFirebaseListeners(
 
 
 
-/* =====================================================
-   RESET GRAFIK
-===================================================== */
+/* =========================
+   CLEAR CHART
+========================= */
 
 function clearCharts() {
-
 
     if (
         tempChart
     ) {
 
-
-        tempChart
-        .data
-        .labels =
+        tempChart.data.labels =
             [];
 
 
@@ -3213,21 +2751,16 @@ function clearCharts() {
             1;
 
 
-        tempChart
-        .update();
+        tempChart.update();
 
     }
-
 
 
     if (
         humChart
     ) {
 
-
-        humChart
-        .data
-        .labels =
+        humChart.data.labels =
             [];
 
 
@@ -3263,8 +2796,7 @@ function clearCharts() {
             5;
 
 
-        humChart
-        .update();
+        humChart.update();
 
     }
 
@@ -3272,12 +2804,11 @@ function clearCharts() {
 
 
 
-/* =====================================================
-   GANTI HARDWARE
-===================================================== */
+/* =========================
+   SWITCH HARDWARE
+========================= */
 
 function switchHardwareNode() {
-
 
     currentNode =
 
@@ -3299,82 +2830,54 @@ function switchHardwareNode() {
 
 
 
-/* =====================================================
+/* =========================
    EXPORT CSV
-===================================================== */
+========================= */
 
 function exportToCSV() {
 
-
     if (
-
-        cachedLogData
-        .length
-        ===
-        0
-
+        cachedLogData.length === 0
     ) {
 
-
         alert(
-
             "Belum ada data log tersimpan."
-
         );
-
 
         return;
 
     }
 
 
-
     let csv =
 
         "Waktu Pencatatan,"
-
         +
-
         "Suhu (C),"
-
         +
-
         "Kelembaban (%RH),"
-
         +
-
         "Status Ruangan\n";
-
 
 
     cachedLogData
     .forEach(
 
-        function (
-            item
-        ) {
-
+        function (item) {
 
             csv +=
 
                 `"${item.Waktu || ""}",`
-
                 +
-
                 `"${item.Suhu ?? ""}",`
-
                 +
-
                 `"${item.Kelembaban ?? ""}",`
-
                 +
-
                 `"${item.Status || ""}"\n`;
 
         }
 
     );
-
 
 
     const blob =
@@ -3384,14 +2887,11 @@ function exportToCSV() {
             [csv],
 
             {
-
                 type:
                     "text/csv;charset=utf-8;"
-
             }
 
         );
-
 
 
     const url =
@@ -3401,33 +2901,24 @@ function exportToCSV() {
         );
 
 
-
     const a =
 
-        document
-        .createElement(
+        document.createElement(
             "a"
         );
-
 
 
     a.href =
         url;
 
 
-
     a.download =
 
         "Laporan_Ruang_Operasi_"
-
         +
-
         currentNode
-
         +
-
         ".csv";
-
 
 
     document.body
@@ -3436,9 +2927,7 @@ function exportToCSV() {
     );
 
 
-
     a.click();
-
 
 
     document.body
@@ -3447,9 +2936,7 @@ function exportToCSV() {
     );
 
 
-
-    URL
-    .revokeObjectURL(
+    URL.revokeObjectURL(
         url
     );
 
@@ -3457,33 +2944,23 @@ function exportToCSV() {
 
 
 
-/* =====================================================
+/* =========================
    AUTH STATE
-===================================================== */
+========================= */
 
 auth.onAuthStateChanged(
 
-    function (
-        user
-    ) {
-
+    function (user) {
 
         if (
             user
         ) {
 
-
-            loginScreen
-            .style
-            .display =
-
+            loginScreen.style.display =
                 "none";
 
 
-            dashboardApp
-            .style
-            .display =
-
+            dashboardApp.style.display =
                 "block";
 
 
@@ -3494,24 +2971,18 @@ auth.onAuthStateChanged(
 
 
             attachFirebaseListeners(
-
                 currentNode
-
             );
 
         }
 
-
         else {
 
-
             if (
                 activeMonitoringRef
             ) {
 
-
-                activeMonitoringRef
-                .off();
+                activeMonitoringRef.off();
 
             }
 
@@ -3520,55 +2991,40 @@ auth.onAuthStateChanged(
                 activeLogRef
             ) {
 
-
-                activeLogRef
-                .off();
+                activeLogRef.off();
 
             }
 
 
-
-            dashboardApp
-            .style
-            .display =
-
+            dashboardApp.style.display =
                 "none";
 
 
-            loginScreen
-            .style
-            .display =
-
+            loginScreen.style.display =
                 "flex";
 
 
-            loginUsername
-            .value =
+            loginUsername.value =
                 "";
 
 
-            loginPassword
-            .value =
+            loginPassword.value =
                 "";
 
 
-            loginPassword
-            .type =
+            loginPassword.type =
                 "password";
 
 
-            togglePassword
-            .innerText =
+            togglePassword.innerText =
                 "👁";
 
 
-            humanCheck
-            .checked =
+            humanCheck.checked =
                 false;
 
 
-            loginButton
-            .disabled =
+            loginButton.disabled =
                 true;
 
         }
