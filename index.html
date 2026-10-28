@@ -1,1150 +1,2590 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Monitoring Ruang Operasi</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <!-- FONT -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>
+        Monitoring Ruang Operasi
+    </title>
+
+
+    <!-- =========================
+         GOOGLE FONT
+    ========================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
     <link
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap"
         rel="stylesheet"
     >
 
-    <!-- FIREBASE V8 -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-    <!-- CHART.JS -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- =========================
+         FIREBASE
+    ========================== -->
+
+    <script
+        src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js">
+    </script>
+
+    <script
+        src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js">
+    </script>
+
+    <script
+        src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js">
+    </script>
+
+
+    <!-- =========================
+         CHART
+    ========================== -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/chart.js">
+    </script>
+
 
     <style>
+
         :root {
+
             --espresso: #3E2723;
             --petal: #F4C9D6;
             --ivory: #F5F0E6;
             --bg: #FAF6F0;
             --white: #FFFFFF;
+
             --green: #2E7D32;
             --red: #D32F2F;
             --orange: #F57C00;
-            --shadow: 0 12px 28px rgba(62, 39, 35, 0.08);
+
+            --shadow:
+                0 12px 28px
+                rgba(62, 39, 35, 0.08);
+
         }
+
 
         * {
+
             box-sizing: border-box;
-            font-family: "Montserrat", sans-serif;
+
+            font-family:
+                "Montserrat",
+                sans-serif;
+
         }
 
+
         body {
+
             margin: 0;
+
             padding: 24px;
-            background: var(--bg);
-            color: var(--espresso);
+
+            background:
+                var(--bg);
+
+            color:
+                var(--espresso);
+
         }
+
 
         button,
         input,
         select {
-            font-family: "Montserrat", sans-serif;
+
+            font-family:
+                "Montserrat",
+                sans-serif;
+
         }
 
-        /* ================= LOGIN ================= */
+
+
+        /* ==========================================
+           LOGIN
+        ========================================== */
+
 
         #loginScreen {
-            min-height: calc(100vh - 48px);
+
+            min-height:
+                calc(100vh - 48px);
+
             display: flex;
-            justify-content: center;
-            align-items: center;
+
+            justify-content:
+                center;
+
+            align-items:
+                center;
+
         }
+
 
         .login-card {
+
             width: 100%;
-            max-width: 430px;
-            background: var(--white);
-            border: 3px solid var(--ivory);
-            border-radius: 28px;
-            padding: 32px;
-            box-shadow: var(--shadow);
+
+            max-width:
+                430px;
+
+            background:
+                var(--white);
+
+            border:
+                3px solid
+                var(--ivory);
+
+            border-radius:
+                28px;
+
+            padding:
+                32px;
+
+            box-shadow:
+                var(--shadow);
+
         }
+
 
         .login-icon {
-            font-size: 38px;
-            text-align: center;
-            margin-bottom: 10px;
+
+            text-align:
+                center;
+
+            font-size:
+                40px;
+
+            margin-bottom:
+                10px;
+
         }
+
 
         .login-card h1 {
-            text-align: center;
-            margin: 0;
-            font-size: 24px;
-            font-weight: 900;
+
+            margin:
+                0;
+
+            text-align:
+                center;
+
+            font-size:
+                24px;
+
+            font-weight:
+                900;
+
         }
+
 
         .login-subtitle {
-            text-align: center;
-            font-size: 12px;
-            line-height: 1.6;
-            opacity: 0.7;
-            margin: 10px 0 26px;
+
+            text-align:
+                center;
+
+            font-size:
+                12px;
+
+            line-height:
+                1.6;
+
+            opacity:
+                0.7;
+
+            margin:
+                10px 0 26px;
+
         }
+
 
         .form-group {
-            margin-bottom: 16px;
+
+            margin-bottom:
+                17px;
+
         }
+
 
         .form-group label {
-            display: block;
-            margin-bottom: 7px;
-            font-size: 12px;
-            font-weight: 800;
+
+            display:
+                block;
+
+            margin-bottom:
+                7px;
+
+            font-size:
+                12px;
+
+            font-weight:
+                800;
+
         }
+
 
         .form-group input {
-            width: 100%;
-            padding: 14px 15px;
-            border: 2px solid var(--ivory);
-            border-radius: 14px;
-            outline: none;
-            font-size: 14px;
-            background: white;
-            color: var(--espresso);
+
+            width:
+                100%;
+
+            padding:
+                14px 15px;
+
+            border:
+                2px solid
+                var(--ivory);
+
+            border-radius:
+                14px;
+
+            outline:
+                none;
+
+            font-size:
+                14px;
+
+            color:
+                var(--espresso);
+
+            background:
+                white;
+
         }
+
 
         .form-group input:focus {
-            border-color: var(--petal);
+
+            border-color:
+                var(--petal);
+
         }
+
+
+
+        /* PASSWORD */
+
+
+        .password-wrap {
+
+            position:
+                relative;
+
+        }
+
+
+        .password-wrap input {
+
+            padding-right:
+                55px;
+
+        }
+
+
+        .toggle-password {
+
+            position:
+                absolute;
+
+            right:
+                8px;
+
+            top:
+                50%;
+
+            transform:
+                translateY(-50%);
+
+            width:
+                40px;
+
+            height:
+                40px;
+
+            border:
+                none;
+
+            border-radius:
+                10px;
+
+            background:
+                transparent;
+
+            cursor:
+                pointer;
+
+            font-size:
+                18px;
+
+        }
+
+
+        .toggle-password:hover {
+
+            background:
+                var(--ivory);
+
+        }
+
+
+
+        /* CHECKBOX */
+
 
         .human-check {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-            background: var(--ivory);
-            padding: 14px;
-            border-radius: 14px;
-            margin: 18px 0;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 800;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                11px;
+
+            background:
+                var(--ivory);
+
+            padding:
+                14px;
+
+            border-radius:
+                14px;
+
+            margin:
+                18px 0;
+
+            cursor:
+                pointer;
+
+            font-size:
+                13px;
+
+            font-weight:
+                800;
+
         }
+
 
         .human-check input {
-            width: 21px;
-            height: 21px;
-            accent-color: var(--espresso);
+
+            width:
+                21px;
+
+            height:
+                21px;
+
+            accent-color:
+                var(--espresso);
+
         }
+
+
+
+        /* BUTTON LOGIN */
+
 
         .btn-login {
-            width: 100%;
-            border: none;
-            border-radius: 16px;
-            background: var(--espresso);
-            color: var(--petal);
-            padding: 14px;
-            font-size: 14px;
-            font-weight: 900;
-            cursor: pointer;
+
+            width:
+                100%;
+
+            border:
+                none;
+
+            border-radius:
+                16px;
+
+            background:
+                var(--espresso);
+
+            color:
+                var(--petal);
+
+            padding:
+                14px;
+
+            font-size:
+                14px;
+
+            font-weight:
+                900;
+
+            cursor:
+                pointer;
+
         }
+
+
+        .btn-login:hover {
+
+            background:
+                #281815;
+
+        }
+
 
         .btn-login:disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
+
+            opacity:
+                0.45;
+
+            cursor:
+                not-allowed;
+
         }
+
 
         .login-error {
-            min-height: 20px;
-            color: var(--red);
-            font-size: 12px;
-            font-weight: 700;
-            text-align: center;
-            margin-top: 13px;
+
+            min-height:
+                20px;
+
+            color:
+                var(--red);
+
+            font-size:
+                12px;
+
+            font-weight:
+                700;
+
+            text-align:
+                center;
+
+            margin-top:
+                13px;
+
         }
+
 
         .login-note {
-            text-align: center;
-            font-size: 10px;
-            opacity: 0.6;
-            line-height: 1.5;
-            margin-top: 12px;
+
+            margin-top:
+                13px;
+
+            font-size:
+                10px;
+
+            text-align:
+                center;
+
+            opacity:
+                0.6;
+
+            line-height:
+                1.5;
+
         }
 
-        /* ================= DASHBOARD ================= */
+
+
+        /* ==========================================
+           DASHBOARD
+        ========================================== */
+
 
         #dashboardApp {
-            display: none;
+
+            display:
+                none;
+
         }
+
 
         .container {
-            max-width: 1050px;
-            margin: 0 auto;
+
+            max-width:
+                1050px;
+
+            margin:
+                0 auto;
+
         }
+
+
+
+        /* HEADER */
+
 
         .app-header {
-            background: var(--espresso);
-            color: var(--ivory);
-            padding: 30px;
-            border-radius: 28px;
-            box-shadow: var(--shadow);
-            margin-bottom: 24px;
 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
+            background:
+                var(--espresso);
+
+            color:
+                var(--ivory);
+
+            padding:
+                30px;
+
+            border-radius:
+                28px;
+
+            box-shadow:
+                var(--shadow);
+
+            margin-bottom:
+                24px;
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                center;
+
+            gap:
+                16px;
+
+            flex-wrap:
+                wrap;
+
         }
+
 
         .app-title h1 {
-            color: var(--petal);
-            margin: 0 0 7px;
-            font-size: 22px;
-            font-weight: 900;
+
+            color:
+                var(--petal);
+
+            margin:
+                0 0 7px;
+
+            font-size:
+                22px;
+
+            font-weight:
+                900;
+
         }
+
 
         .app-title p {
-            margin: 0;
-            font-size: 12px;
-            font-weight: 600;
-            opacity: 0.9;
+
+            margin:
+                0;
+
+            font-size:
+                12px;
+
+            font-weight:
+                600;
+
+            opacity:
+                0.9;
+
         }
+
+
+
+        /* HEADER CONTROL */
+
 
         .header-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
+
+            display:
+                flex;
+
+            gap:
+                10px;
+
+            align-items:
+                center;
+
+            flex-wrap:
+                wrap;
+
         }
+
 
         .hardware-selector {
-            background: var(--petal);
-            border-radius: 20px;
-            padding: 10px 18px;
 
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            background:
+                var(--petal);
+
+            border-radius:
+                20px;
+
+            padding:
+                10px 18px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                8px;
+
         }
+
 
         .hardware-selector label {
-            font-size: 12px;
-            font-weight: 900;
+
+            font-size:
+                12px;
+
+            font-weight:
+                900;
+
         }
+
 
         .hardware-selector select {
-            border: none;
-            outline: none;
-            background: transparent;
-            color: var(--espresso);
-            font-weight: 800;
-            cursor: pointer;
+
+            border:
+                none;
+
+            outline:
+                none;
+
+            background:
+                transparent;
+
+            color:
+                var(--espresso);
+
+            font-weight:
+                800;
+
+            cursor:
+                pointer;
+
         }
+
 
         .btn-logout {
-            border: none;
-            border-radius: 15px;
-            padding: 11px 17px;
-            background: white;
-            color: var(--espresso);
-            font-size: 11px;
-            font-weight: 900;
-            cursor: pointer;
+
+            border:
+                none;
+
+            border-radius:
+                15px;
+
+            padding:
+                11px 17px;
+
+            background:
+                white;
+
+            color:
+                var(--espresso);
+
+            font-size:
+                11px;
+
+            font-weight:
+                900;
+
+            cursor:
+                pointer;
+
         }
+
+
+
+        /* ==========================================
+           STATUS
+        ========================================== */
+
 
         .status-banner {
-            padding: 20px;
-            border-radius: 22px;
-            background: var(--petal);
-            color: var(--espresso);
-            font-size: 18px;
-            font-weight: 900;
-            text-align: center;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow);
-            transition: 0.3s;
+
+            padding:
+                20px;
+
+            border-radius:
+                22px;
+
+            background:
+                var(--petal);
+
+            color:
+                var(--espresso);
+
+            font-size:
+                18px;
+
+            font-weight:
+                900;
+
+            text-align:
+                center;
+
+            margin-bottom:
+                24px;
+
+            box-shadow:
+                var(--shadow);
+
+            transition:
+                0.3s;
+
         }
+
+
+
+        /* ==========================================
+           SENSOR CARD
+        ========================================== */
+
 
         .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 24px;
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(
+                        280px,
+                        1fr
+                    )
+                );
+
+            gap:
+                24px;
+
+            margin-bottom:
+                24px;
+
         }
+
 
         .metric-card {
-            background: var(--ivory);
-            padding: 28px;
-            border-radius: 26px;
-            border: 3px solid white;
-            box-shadow: var(--shadow);
+
+            background:
+                var(--ivory);
+
+            padding:
+                28px;
+
+            border-radius:
+                26px;
+
+            border:
+                3px solid
+                white;
+
+            box-shadow:
+                var(--shadow);
+
         }
+
 
         .metric-header {
-            font-size: 14px;
-            font-weight: 900;
-            margin-bottom: 15px;
+
+            font-size:
+                14px;
+
+            font-weight:
+                900;
+
+            margin-bottom:
+                15px;
+
         }
+
 
         .metric-value {
-            font-size: 52px;
-            font-weight: 900;
-            line-height: 1;
-            margin-bottom: 14px;
+
+            font-size:
+                52px;
+
+            font-weight:
+                900;
+
+            line-height:
+                1;
+
+            margin-bottom:
+                14px;
+
         }
+
 
         .metric-unit {
-            font-size: 22px;
-            color: #795548;
+
+            font-size:
+                22px;
+
+            color:
+                #795548;
+
         }
+
 
         .metric-range {
-            display: inline-block;
-            background: white;
-            border-radius: 12px;
-            padding: 6px 13px;
-            font-size: 11px;
-            font-weight: 700;
+
+            display:
+                inline-block;
+
+            background:
+                white;
+
+            border-radius:
+                12px;
+
+            padding:
+                6px 13px;
+
+            font-size:
+                11px;
+
+            font-weight:
+                700;
+
         }
+
+
+
+        /* ==========================================
+           PANEL
+        ========================================== */
+
 
         .panel {
-            background: white;
-            border: 3px solid var(--ivory);
-            border-radius: 28px;
-            padding: 28px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow);
+
+            background:
+                white;
+
+            border:
+                3px solid
+                var(--ivory);
+
+            border-radius:
+                28px;
+
+            padding:
+                28px;
+
+            margin-bottom:
+                24px;
+
+            box-shadow:
+                var(--shadow);
+
         }
+
 
         .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
 
-            border-bottom: 2px dashed var(--petal);
-            padding-bottom: 14px;
-            margin-bottom: 20px;
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                center;
+
+            gap:
+                12px;
+
+            flex-wrap:
+                wrap;
+
+            border-bottom:
+                2px dashed
+                var(--petal);
+
+            padding-bottom:
+                14px;
+
+            margin-bottom:
+                20px;
+
         }
+
 
         .panel-header h2 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 900;
+
+            margin:
+                0;
+
+            font-size:
+                16px;
+
+            font-weight:
+                900;
+
         }
+
+
+
+        /* ==========================================
+           EXPORT BUTTON
+        ========================================== */
+
 
         .btn-export {
-            border: none;
-            border-radius: 17px;
-            background: var(--espresso);
-            color: var(--petal);
-            padding: 12px 20px;
-            font-size: 11px;
-            font-weight: 900;
-            cursor: pointer;
+
+            border:
+                none;
+
+            border-radius:
+                17px;
+
+            background:
+                var(--espresso);
+
+            color:
+                var(--petal);
+
+            padding:
+                12px 20px;
+
+            font-size:
+                11px;
+
+            font-weight:
+                900;
+
+            cursor:
+                pointer;
+
         }
+
+
+
+        /* ==========================================
+           TABLE
+        ========================================== */
+
 
         .table-responsive {
-            overflow-x: auto;
+
+            overflow-x:
+                auto;
+
         }
+
 
         table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
+
+            width:
+                100%;
+
+            border-collapse:
+                collapse;
+
+            font-size:
+                13px;
+
         }
+
 
         th {
-            background: var(--ivory);
-            padding: 14px;
-            text-align: left;
+
+            background:
+                var(--ivory);
+
+            padding:
+                14px;
+
+            text-align:
+                left;
+
         }
+
 
         td {
-            padding: 14px;
-            border-bottom: 1px solid var(--ivory);
-            font-weight: 600;
+
+            padding:
+                14px;
+
+            border-bottom:
+                1px solid
+                var(--ivory);
+
+            font-weight:
+                600;
+
         }
+
 
         .status-tag {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 12px;
-            color: white;
-            font-size: 10px;
-            font-weight: 800;
+
+            display:
+                inline-block;
+
+            padding:
+                6px 12px;
+
+            border-radius:
+                12px;
+
+            color:
+                white;
+
+            font-size:
+                10px;
+
+            font-weight:
+                800;
+
         }
+
+
+
+        /* ==========================================
+           LAST UPDATE
+        ========================================== */
+
 
         .sync-time {
-            text-align: center;
-            font-size: 11px;
-            font-weight: 700;
-            opacity: 0.7;
-            margin: 10px 0 25px;
+
+            text-align:
+                center;
+
+            font-size:
+                11px;
+
+            font-weight:
+                700;
+
+            opacity:
+                0.7;
+
+            margin:
+                10px 0 25px;
+
         }
 
-        @media (max-width: 600px) {
+
+
+        /* ==========================================
+           MOBILE
+        ========================================== */
+
+
+        @media
+        (max-width: 600px) {
+
             body {
-                padding: 14px;
+
+                padding:
+                    14px;
+
             }
+
 
             .app-header {
-                padding: 22px;
+
+                padding:
+                    22px;
+
             }
 
+
             .metric-value {
-                font-size: 42px;
+
+                font-size:
+                    42px;
+
             }
+
         }
+
     </style>
+
 </head>
+
 
 <body>
 
-<!-- ===================================================== -->
-<!-- LOGIN -->
-<!-- ===================================================== -->
+
+<!-- =====================================================
+     LOGIN
+===================================================== -->
+
 
 <section id="loginScreen">
 
+
     <div class="login-card">
 
-        <div class="login-icon">🔐</div>
 
-        <h1>Login Monitoring</h1>
+        <div class="login-icon">
+
+            🔐
+
+        </div>
+
+
+        <h1>
+
+            Login Monitoring
+
+        </h1>
+
 
         <p class="login-subtitle">
-            Masuk untuk melihat dashboard monitoring
-            suhu dan kelembaban ruang operasi.
+
+            Masuk untuk melihat dashboard
+            monitoring suhu dan kelembaban
+            ruang operasi.
+
         </p>
+
+
 
         <form id="loginForm">
 
+
+            <!-- USERNAME -->
+
+
             <div class="form-group">
-                <label for="loginEmail">Email</label>
+
+                <label
+                    for="loginUsername">
+
+                    Username
+
+                </label>
+
 
                 <input
-                    type="email"
-                    id="loginEmail"
+
+                    type="text"
+
+                    id="loginUsername"
+
                     autocomplete="username"
-                    placeholder="Masukkan email"
+
+                    placeholder="Masukkan username"
+
+                    maxlength="20"
+
                     required
+
                 >
+
             </div>
+
+
+
+            <!-- PASSWORD -->
+
 
             <div class="form-group">
-                <label for="loginPassword">Password</label>
 
-                <input
-                    type="password"
-                    id="loginPassword"
-                    autocomplete="current-password"
-                    placeholder="Masukkan password"
-                    required
-                >
+
+                <label
+                    for="loginPassword">
+
+                    Password
+
+                </label>
+
+
+                <div class="password-wrap">
+
+
+                    <input
+
+                        type="password"
+
+                        id="loginPassword"
+
+                        autocomplete=
+                        "current-password"
+
+                        placeholder=
+                        "Masukkan password"
+
+                        required
+
+                    >
+
+
+                    <button
+
+                        type="button"
+
+                        id="togglePassword"
+
+                        class=
+                        "toggle-password"
+
+                        title=
+                        "Lihat password"
+
+                    >
+
+                        👁
+
+                    </button>
+
+
+                </div>
+
+
             </div>
+
+
+
+            <!-- CHECKBOX -->
+
 
             <label class="human-check">
 
+
                 <input
+
                     type="checkbox"
+
                     id="humanCheck"
+
                 >
 
-                <span>Saya bukan robot</span>
+
+                <span>
+
+                    Saya bukan robot
+
+                </span>
+
 
             </label>
 
+
+
+            <!-- BUTTON LOGIN -->
+
+
             <button
+
                 type="submit"
+
                 id="loginButton"
+
                 class="btn-login"
+
                 disabled
+
             >
+
                 MASUK KE DASHBOARD
+
             </button>
+
+
 
             <div
                 id="loginError"
                 class="login-error">
+
             </div>
+
 
         </form>
 
+
+
         <div class="login-note">
-            Login diamankan menggunakan Firebase Authentication.
+
+            Login diamankan menggunakan
+            Firebase Authentication.
+
         </div>
 
+
     </div>
+
 
 </section>
 
 
-<!-- ===================================================== -->
-<!-- DASHBOARD -->
-<!-- ===================================================== -->
 
-<div id="dashboardApp" class="container">
+<!-- =====================================================
+     DASHBOARD
+===================================================== -->
+
+
+<div
+
+    id="dashboardApp"
+
+    class="container"
+
+>
+
+
 
     <!-- HEADER -->
 
+
     <div class="app-header">
+
 
         <div class="app-title">
 
-            <h1>🧸 MONITORING RUANG OPERASI</h1>
+
+            <h1>
+
+                🧸 MONITORING RUANG OPERASI
+
+            </h1>
+
 
             <p>
+
                 Standar Permenkes No. 2 Tahun 2023
-                (Suhu: 19–24°C | Kelembaban: 40–60%RH)
+
+                (Suhu: 19–24°C |
+
+                Kelembaban: 40–60%RH)
+
             </p>
 
+
         </div>
+
 
 
         <div class="header-controls">
 
-            <div class="hardware-selector">
 
-                <label for="nodeSelect">
+            <div class=
+                "hardware-selector">
+
+
+                <label
+                    for="nodeSelect">
+
                     ⚡ DEVICE:
+
                 </label>
 
+
                 <select
+
                     id="nodeSelect"
-                    onchange="switchHardwareNode()">
 
-                    <option value="Hardware_1">
-                        Ruang Operasi 1 (Utama)
+                    onchange=
+                    "switchHardwareNode()"
+
+                >
+
+
+                    <option
+                        value="Hardware_1">
+
+                        Ruang Operasi 1
+                        (Utama)
+
                     </option>
 
-                    <option value="Hardware_2">
+
+                    <option
+                        value="Hardware_2">
+
                         Ruang Operasi 2
+
                     </option>
 
-                    <option value="Hardware_3">
+
+                    <option
+                        value="Hardware_3">
+
                         Ruang Operasi 3
+
                     </option>
 
-                    <option value="Hardware_4">
+
+                    <option
+                        value="Hardware_4">
+
                         Ruang Operasi 4
+
                     </option>
 
-                    <option value="Hardware_5">
+
+                    <option
+                        value="Hardware_5">
+
                         Ruang Operasi 5
+
                     </option>
+
 
                 </select>
 
+
             </div>
 
+
+
             <button
+
                 class="btn-logout"
-                onclick="logoutUser()">
+
+                onclick="logoutUser()"
+
+            >
+
                 KELUAR
+
             </button>
 
+
         </div>
+
 
     </div>
 
 
+
     <!-- STATUS -->
 
+
     <div
+
         id="statusBanner"
-        class="status-banner">
+
+        class="status-banner"
+
+    >
 
         Menghubungkan ke sistem...
 
     </div>
 
 
-    <!-- NILAI SENSOR -->
+
+    <!-- SENSOR -->
+
 
     <div class="metrics-grid">
 
+
+
+        <!-- SUHU -->
+
+
         <div class="metric-card">
 
-            <div class="metric-header">
+
+            <div class=
+                "metric-header">
+
                 🌡️ SUHU RUANGAN
+
             </div>
 
-            <div class="metric-value">
 
-                <span id="valSuhu">--</span>
+            <div class=
+                "metric-value">
 
-                <span class="metric-unit">
-                    °C
+
+                <span id="valSuhu">
+
+                    --
+
                 </span>
 
+
+                <span
+                    class="metric-unit">
+
+                    °C
+
+                </span>
+
+
             </div>
 
-            <div class="metric-range">
-                Batas Normal: 19.0°C – 24.0°C
+
+            <div class=
+                "metric-range">
+
+                Batas Normal:
+                19.0°C – 24.0°C
+
             </div>
+
 
         </div>
+
+
+
+        <!-- KELEMBABAN -->
 
 
         <div class="metric-card">
 
-            <div class="metric-header">
+
+            <div class=
+                "metric-header">
+
                 💧 KELEMBABAN UDARA
+
             </div>
 
-            <div class="metric-value">
 
-                <span id="valHum">--</span>
+            <div class=
+                "metric-value">
 
-                <span class="metric-unit">
-                    %RH
+
+                <span id="valHum">
+
+                    --
+
                 </span>
 
+
+                <span
+                    class="metric-unit">
+
+                    %RH
+
+                </span>
+
+
             </div>
 
-            <div class="metric-range">
-                Batas Normal: 40%RH – 60%RH
+
+            <div class=
+                "metric-range">
+
+                Batas Normal:
+                40%RH – 60%RH
+
             </div>
+
 
         </div>
+
 
     </div>
+
 
 
     <!-- GRAFIK -->
 
+
     <div class="panel">
 
-        <div class="panel-header">
+
+        <div class=
+            "panel-header">
+
 
             <h2>
+
                 📈 Grafik Pemantauan Realtime
+
             </h2>
+
 
         </div>
 
+
         <canvas
+
             id="chart24h"
-            height="110">
+
+            height="110"
+
+        >
+
         </canvas>
+
 
     </div>
 
 
-    <!-- LOG DATA -->
+
+    <!-- LOG -->
+
 
     <div class="panel">
 
-        <div class="panel-header">
+
+        <div class=
+            "panel-header">
+
 
             <h2>
+
                 📋 Log Data Otomatis
                 (07.00, 14.00, 21.00 WIB)
+
             </h2>
 
+
             <button
+
                 class="btn-export"
-                onclick="exportToCSV()">
+
+                onclick=
+                "exportToCSV()"
+
+            >
 
                 📥 Tarik Data Excel (.csv)
 
             </button>
 
+
         </div>
 
-        <div class="table-responsive">
+
+
+        <div class=
+            "table-responsive">
+
 
             <table>
 
+
                 <thead>
+
 
                     <tr>
 
+
                         <th>
+
                             Waktu Pencatatan
+
                         </th>
 
+
                         <th>
+
                             Suhu (°C)
+
                         </th>
 
+
                         <th>
+
                             Kelembaban (%RH)
+
                         </th>
 
+
                         <th>
+
                             Status Ruangan
+
                         </th>
+
 
                     </tr>
+
 
                 </thead>
 
-                <tbody id="logTableBody">
+
+
+                <tbody
+                    id="logTableBody">
+
 
                     <tr>
 
-                        <td
-                            colspan="4"
-                            style="text-align:center">
 
-                            Memuat data dari database...
+                        <td
+
+                            colspan="4"
+
+                            style=
+                            "text-align:center"
+
+                        >
+
+                            Memuat data
+                            dari database...
 
                         </td>
 
+
                     </tr>
+
 
                 </tbody>
 
+
             </table>
+
 
         </div>
 
+
     </div>
+
+
+
+    <!-- WAKTU -->
 
 
     <div class="sync-time">
 
+
         ✨ Waktu Data Terakhir:
 
+
         <span id="syncTime">
+
             --
+
         </span>
 
+
     </div>
+
 
 </div>
 
 
+
 <script>
 
-/* ========================================================
+
+/* =====================================================
    FIREBASE CONFIG
-======================================================== */
+===================================================== */
+
 
 const firebaseConfig = {
 
+
     apiKey:
+
         "AIzaSyC44n4OsHy_iuoVbWYkK0VbDLcZCVAtysA",
 
+
     authDomain:
+
         "diagnostik-monitoring.firebaseapp.com",
 
+
     databaseURL:
+
         "https://diagnostik-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
 
+
     projectId:
+
         "diagnostik-monitoring",
 
+
     storageBucket:
+
         "diagnostik-monitoring.firebasestorage.app",
 
+
     messagingSenderId:
+
         "823689373846",
 
+
     appId:
+
         "1:823689373846:web:23f175ea86d2a5ea823ab7",
 
+
     measurementId:
+
         "G-0MCE5RWW9Q"
+
 
 };
 
 
-/* ========================================================
-   FIREBASE INITIALIZATION
-======================================================== */
 
-firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth();
-
-const db = firebase.database();
-
-
-/* ========================================================
-   GLOBAL VARIABLES
-======================================================== */
-
-let currentNode = "Hardware_1";
-
-let chartInstance = null;
-
-let cachedLogData = [];
-
-let activeMonitoringRef = null;
-
-let activeLogRef = null;
-
-
-/* ========================================================
-   ELEMENT LOGIN
-======================================================== */
-
-const loginScreen =
-    document.getElementById("loginScreen");
-
-const dashboardApp =
-    document.getElementById("dashboardApp");
-
-const loginForm =
-    document.getElementById("loginForm");
-
-const loginEmail =
-    document.getElementById("loginEmail");
-
-const loginPassword =
-    document.getElementById("loginPassword");
-
-const humanCheck =
-    document.getElementById("humanCheck");
-
-const loginButton =
-    document.getElementById("loginButton");
-
-const loginError =
-    document.getElementById("loginError");
-
-
-/* ========================================================
-   CHECKBOX BUKAN ROBOT
-======================================================== */
-
-humanCheck.addEventListener(
-    "change",
-    function () {
-
-        loginButton.disabled =
-            !humanCheck.checked;
-
-        loginError.innerText = "";
-
-    }
+firebase.initializeApp(
+    firebaseConfig
 );
 
 
-/* ========================================================
-   LOGIN FIREBASE
-======================================================== */
+const auth =
+    firebase.auth();
+
+
+const db =
+    firebase.database();
+
+
+
+/* =====================================================
+   LOGIN CONFIG
+===================================================== */
+
+
+/*
+
+USERNAME WEBSITE:
+
+marnar
+
+
+Firebase tetap membutuhkan email
+untuk Authentication.
+
+Jadi username "marnar"
+dipetakan secara internal menjadi:
+
+marnar@diagnostik-monitoring.example.com
+
+*/
+
+
+const LOGIN_USERNAME =
+    "marnar";
+
+
+const FIREBASE_LOGIN_EMAIL =
+    "marnar@diagnostik-monitoring.example.com";
+
+
+
+/* =====================================================
+   GLOBAL VARIABLE
+===================================================== */
+
+
+let currentNode =
+    "Hardware_1";
+
+
+let chartInstance =
+    null;
+
+
+let cachedLogData =
+    [];
+
+
+let activeMonitoringRef =
+    null;
+
+
+let activeLogRef =
+    null;
+
+
+
+/* =====================================================
+   ELEMENT LOGIN
+===================================================== */
+
+
+const loginScreen =
+
+    document.getElementById(
+        "loginScreen"
+    );
+
+
+const dashboardApp =
+
+    document.getElementById(
+        "dashboardApp"
+    );
+
+
+const loginForm =
+
+    document.getElementById(
+        "loginForm"
+    );
+
+
+const loginUsername =
+
+    document.getElementById(
+        "loginUsername"
+    );
+
+
+const loginPassword =
+
+    document.getElementById(
+        "loginPassword"
+    );
+
+
+const togglePassword =
+
+    document.getElementById(
+        "togglePassword"
+    );
+
+
+const humanCheck =
+
+    document.getElementById(
+        "humanCheck"
+    );
+
+
+const loginButton =
+
+    document.getElementById(
+        "loginButton"
+    );
+
+
+const loginError =
+
+    document.getElementById(
+        "loginError"
+    );
+
+
+
+/* =====================================================
+   LIHAT / SEMBUNYIKAN PASSWORD
+===================================================== */
+
+
+togglePassword.addEventListener(
+
+    "click",
+
+    function () {
+
+
+        if (
+            loginPassword.type
+            ===
+            "password"
+        ) {
+
+
+            loginPassword.type =
+                "text";
+
+
+            togglePassword.innerText =
+                "🙈";
+
+
+            togglePassword.title =
+                "Sembunyikan password";
+
+
+        }
+
+
+        else {
+
+
+            loginPassword.type =
+                "password";
+
+
+            togglePassword.innerText =
+                "👁";
+
+
+            togglePassword.title =
+                "Lihat password";
+
+
+        }
+
+
+    }
+
+);
+
+
+
+/* =====================================================
+   CHECKBOX
+===================================================== */
+
+
+humanCheck.addEventListener(
+
+    "change",
+
+    function () {
+
+
+        loginButton.disabled =
+
+            !humanCheck.checked;
+
+
+        loginError.innerText =
+            "";
+
+
+    }
+
+);
+
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
 
 loginForm.addEventListener(
+
     "submit",
+
     async function (event) {
+
 
         event.preventDefault();
 
 
-        if (!humanCheck.checked) {
+        loginError.innerText =
+            "";
+
+
+
+        /* CEK CHECKBOX */
+
+
+        if (
+            !humanCheck.checked
+        ) {
+
 
             loginError.innerText =
+
                 'Centang "Saya bukan robot" terlebih dahulu.';
+
 
             return;
 
         }
 
 
-        loginButton.disabled = true;
+
+        /* CEK USERNAME */
+
+
+        const usernameInput =
+
+            loginUsername
+            .value
+            .trim()
+            .toLowerCase();
+
+
+
+        if (
+            usernameInput !==
+            LOGIN_USERNAME
+        ) {
+
+
+            loginError.innerText =
+
+                "Username atau password salah.";
+
+
+            return;
+
+        }
+
+
+
+        /* PROSES LOGIN */
+
+
+        loginButton.disabled =
+            true;
+
 
         loginButton.innerText =
             "MEMERIKSA...";
 
-        loginError.innerText = "";
 
 
         try {
 
+
+            /*
+
+            Session hanya bertahan
+            selama browser/tab aktif.
+
+            */
+
+
             await auth.setPersistence(
-                firebase.auth.Auth.Persistence.SESSION
-            );
 
-
-            await auth.signInWithEmailAndPassword(
-
-                loginEmail.value.trim(),
-
-                loginPassword.value
+                firebase.auth
+                .Auth
+                .Persistence
+                .SESSION
 
             );
+
+
+
+            /*
+
+            Username marnar
+            dikonversi ke email Firebase.
+
+            */
+
+
+            await auth
+                .signInWithEmailAndPassword(
+
+                    FIREBASE_LOGIN_EMAIL,
+
+                    loginPassword.value
+
+                );
 
 
         }
 
+
         catch (error) {
 
+
             console.error(
-                "Login error:",
+
+                "LOGIN ERROR:",
+
                 error
+
             );
 
 
             if (
-                error.code ===
-                "auth/wrong-password" ||
 
-                error.code ===
-                "auth/user-not-found" ||
-
-                error.code ===
-                "auth/invalid-login-credentials"
-            ) {
-
-                loginError.innerText =
-                    "Email atau password salah.";
-
-            }
-
-            else if (
-                error.code ===
-                "auth/unauthorized-domain"
-            ) {
-
-                loginError.innerText =
-                    "Domain GitHub Pages belum diizinkan di Firebase.";
-
-            }
-
-            else if (
                 error.code ===
                 "auth/too-many-requests"
+
             ) {
 
+
                 loginError.innerText =
+
                     "Terlalu banyak percobaan login. Coba kembali nanti.";
 
+
             }
+
+
+            else if (
+
+                error.code ===
+                "auth/unauthorized-domain"
+
+            ) {
+
+
+                loginError.innerText =
+
+                    "Domain website belum diizinkan pada Firebase Authentication.";
+
+
+            }
+
 
             else {
 
+
                 loginError.innerText =
-                    "Login gagal. Periksa email dan password.";
+
+                    "Username atau password salah.";
+
 
             }
 
 
-            humanCheck.checked = false;
+            humanCheck.checked =
+                false;
+
 
         }
+
 
         finally {
 
+
             loginButton.innerText =
+
                 "MASUK KE DASHBOARD";
 
+
             loginButton.disabled =
+
                 !humanCheck.checked;
+
 
         }
 
+
     }
+
 );
 
 
-/* ========================================================
+
+/* =====================================================
    LOGOUT
-======================================================== */
+===================================================== */
+
 
 function logoutUser() {
 
+
     auth.signOut();
+
 
 }
 
 
-/* ========================================================
+
+/* =====================================================
    CHART
-======================================================== */
+===================================================== */
+
 
 function initChart() {
 
-    if (chartInstance) {
+
+    if (
+        chartInstance
+    ) {
+
+
         return;
+
+
     }
 
 
-    const canvas =
-        document.getElementById("chart24h");
-
-
     const ctx =
-        canvas.getContext("2d");
+
+        document
+        .getElementById(
+            "chart24h"
+        )
+        .getContext(
+            "2d"
+        );
+
 
 
     chartInstance =
+
         new Chart(
+
             ctx,
+
             {
 
-                type: "line",
+
+                type:
+                    "line",
+
 
                 data: {
 
-                    labels: [],
+
+                    labels:
+                        [],
+
 
                     datasets: [
 
+
                         {
 
+
                             label:
+
                                 "Suhu (°C)",
 
-                            data: [],
+
+                            data:
+                                [],
+
 
                             borderColor:
+
                                 "#3E2723",
 
+
                             backgroundColor:
+
                                 "rgba(62,39,35,0.08)",
 
-                            fill: true,
 
-                            tension: 0.35,
+                            fill:
+                                true,
 
-                            borderWidth: 3,
 
-                            pointRadius: 3
+                            tension:
+                                0.35,
+
+
+                            borderWidth:
+                                3,
+
+
+                            pointRadius:
+                                3
+
 
                         },
 
+
+
                         {
 
+
                             label:
+
                                 "Kelembaban (%RH)",
 
-                            data: [],
+
+                            data:
+                                [],
+
 
                             borderColor:
+
                                 "#F4C9D6",
 
+
                             backgroundColor:
+
                                 "rgba(244,201,214,0.20)",
 
-                            fill: true,
 
-                            tension: 0.35,
+                            fill:
+                                true,
 
-                            borderWidth: 3,
 
-                            pointRadius: 3
+                            tension:
+                                0.35,
+
+
+                            borderWidth:
+                                3,
+
+
+                            pointRadius:
+                                3
+
 
                         }
 
+
                     ]
+
 
                 },
 
 
+
                 options: {
 
-                    responsive: true,
 
-                    maintainAspectRatio: true,
+                    responsive:
+                        true,
+
 
                     plugins: {
 
+
                         legend: {
 
-                            position: "top"
+
+                            position:
+                                "top"
+
 
                         }
+
 
                     },
 
+
                     scales: {
+
 
                         x: {
 
+
                             grid: {
 
-                                display: false
+
+                                display:
+                                    false
+
 
                             }
 
+
                         },
+
 
                         y: {
 
-                            beginAtZero: false
+
+                            beginAtZero:
+                                false
+
 
                         }
 
+
                     }
+
 
                 }
 
+
             }
+
         );
+
 
 }
 
 
-/* ========================================================
-   RESET DASHBOARD
-======================================================== */
 
-function setDashboardWaiting(nodePath) {
+/* =====================================================
+   TAMPILAN MENUNGGU
+===================================================== */
 
-    document.getElementById(
+
+function setDashboardWaiting(
+    nodePath
+) {
+
+
+    document
+    .getElementById(
         "valSuhu"
-    ).innerText = "--";
+    )
+    .innerText =
+        "--";
 
 
-    document.getElementById(
+    document
+    .getElementById(
         "valHum"
-    ).innerText = "--";
+    )
+    .innerText =
+        "--";
 
 
-    document.getElementById(
+    document
+    .getElementById(
         "syncTime"
-    ).innerText = "--";
+    )
+    .innerText =
+        "--";
 
 
     const banner =
-        document.getElementById(
+
+        document
+        .getElementById(
             "statusBanner"
         );
 
 
     banner.innerText =
-        "MENUNGGU DATA " +
-        nodePath +
+
+        "MENUNGGU DATA "
+        +
+        nodePath
+        +
         "...";
 
 
-    banner.style.backgroundColor =
+    banner.style
+    .backgroundColor =
+
         "var(--petal)";
 
 
-    banner.style.color =
+    banner.style
+    .color =
+
         "var(--espresso)";
+
 
 }
 
 
-/* ========================================================
-   FIREBASE REALTIME LISTENER
-======================================================== */
+
+/* =====================================================
+   FIREBASE REALTIME
+===================================================== */
+
 
 function attachFirebaseListeners(
     nodePath
 ) {
 
-    if (activeMonitoringRef) {
 
-        activeMonitoringRef.off();
+    /* LEPAS LISTENER LAMA */
+
+
+    if (
+        activeMonitoringRef
+    ) {
+
+
+        activeMonitoringRef
+        .off();
+
 
     }
 
 
-    if (activeLogRef) {
+    if (
+        activeLogRef
+    ) {
 
-        activeLogRef.off();
+
+        activeLogRef
+        .off();
+
 
     }
+
 
 
     setDashboardWaiting(
@@ -1152,23 +2592,35 @@ function attachFirebaseListeners(
     );
 
 
+
     activeMonitoringRef =
+
         db.ref(
-            nodePath +
+
+            nodePath
+            +
             "/Monitoring"
+
         );
+
 
 
     activeLogRef =
+
         db.ref(
-            nodePath +
+
+            nodePath
+            +
             "/LogData"
+
         );
 
 
-    /* =============================
-       MONITORING REALTIME
-    ============================= */
+
+    /* =================================
+       DATA MONITORING
+    ================================= */
+
 
     activeMonitoringRef.on(
 
@@ -1176,152 +2628,262 @@ function attachFirebaseListeners(
 
         function (snapshot) {
 
+
             const data =
+
                 snapshot.val();
 
 
-            if (!data) {
+
+            if (
+                !data
+            ) {
+
 
                 setDashboardWaiting(
                     nodePath
                 );
 
+
                 return;
+
 
             }
 
 
+
+            /* SUHU */
+
+
             const suhu =
 
-                data.Suhu !== undefined &&
+
+                data.Suhu !== undefined
+                &&
                 data.Suhu !== null
 
-                ? Number(
-                    data.Suhu
-                ).toFixed(1)
 
-                : "--";
+                ?
+
+
+                Number(
+                    data.Suhu
+                )
+                .toFixed(1)
+
+
+                :
+
+
+                "--";
+
+
+
+            /* KELEMBABAN */
 
 
             const hum =
 
-                data.Kelembaban !== undefined &&
-                data.Kelembaban !== null
 
-                ? Number(
+                data.Kelembaban
+                !== undefined
+                &&
+                data.Kelembaban
+                !== null
+
+
+                ?
+
+
+                Number(
                     data.Kelembaban
-                ).toFixed(1)
+                )
+                .toFixed(1)
 
-                : "--";
+
+                :
+
+
+                "--";
+
 
 
             const status =
 
-                data.Status ||
+                data.Status
+                ||
                 "MEMBACA SENSOR...";
+
 
 
             const waktu =
 
-                data.Waktu ||
+                data.Waktu
+                ||
                 "--";
 
 
-            document.getElementById(
+
+            document
+            .getElementById(
                 "valSuhu"
-            ).innerText = suhu;
+            )
+            .innerText =
+                suhu;
 
 
-            document.getElementById(
+
+            document
+            .getElementById(
                 "valHum"
-            ).innerText = hum;
+            )
+            .innerText =
+                hum;
 
 
-            document.getElementById(
+
+            document
+            .getElementById(
                 "syncTime"
-            ).innerText = waktu;
+            )
+            .innerText =
+                waktu;
+
 
 
             const banner =
-                document.getElementById(
+
+                document
+                .getElementById(
                     "statusBanner"
                 );
+
 
 
             banner.innerText =
                 status;
 
 
-            /* WARNA STATUS */
+
+            /* =============================
+               WARNA STATUS
+            ============================= */
+
 
             if (
                 status ===
                 "NORMAL"
             ) {
 
-                banner.style.backgroundColor =
+
+                banner.style
+                .backgroundColor =
+
                     "var(--green)";
 
-                banner.style.color =
+
+                banner.style
+                .color =
+
                     "#FFFFFF";
+
 
             }
 
+
             else if (
+
                 status.includes(
                     "TIDAK NORMAL"
                 )
+
             ) {
 
-                banner.style.backgroundColor =
+
+                banner.style
+                .backgroundColor =
+
                     "var(--red)";
 
-                banner.style.color =
+
+                banner.style
+                .color =
+
                     "#FFFFFF";
 
+
             }
+
 
             else if (
+
                 status ===
                 "SENSOR ERROR"
+
             ) {
 
-                banner.style.backgroundColor =
+
+                banner.style
+                .backgroundColor =
+
                     "#8E24AA";
 
-                banner.style.color =
+
+                banner.style
+                .color =
+
                     "#FFFFFF";
 
+
             }
+
 
             else {
 
-                banner.style.backgroundColor =
+
+                banner.style
+                .backgroundColor =
+
                     "var(--orange)";
 
-                banner.style.color =
+
+                banner.style
+                .color =
+
                     "#FFFFFF";
 
+
             }
+
 
 
             /* =============================
                GRAFIK REALTIME
             ============================= */
 
+
             if (
 
-                data.Suhu !== undefined &&
+                data.Suhu
+                !== undefined
 
-                data.Kelembaban !== undefined
+                &&
+
+                data.Kelembaban
+                !== undefined
 
             ) {
 
+
                 let timeOnly =
+
                     new Date()
                     .toLocaleTimeString(
+
                         "id-ID",
+
                         {
+
                             hour:
                                 "2-digit",
 
@@ -1330,121 +2892,191 @@ function attachFirebaseListeners(
 
                             second:
                                 "2-digit"
+
                         }
+
                     );
 
 
+
                 if (
-                    waktu &&
+
+                    waktu
+
+                    &&
+
                     waktu !== "--"
+
                 ) {
 
-                    const bagianWaktu =
+
+                    const parts =
+
                         String(
                             waktu
-                        ).split(" ");
+                        )
+                        .split(
+                            " "
+                        );
 
 
                     if (
-                        bagianWaktu.length >
+                        parts.length
+                        >
                         1
                     ) {
 
+
                         timeOnly =
-                            bagianWaktu[1];
+
+                            parts[1];
+
 
                     }
 
+
                 }
 
 
-                /* Simpan maksimal 24 titik */
+
+                /* MAKSIMAL 24 TITIK */
+
 
                 if (
-                    chartInstance.data
-                    .labels.length >= 24
+
+                    chartInstance
+                    .data
+                    .labels
+                    .length
+                    >=
+                    24
+
                 ) {
 
-                    chartInstance.data
-                        .labels.shift();
+
+                    chartInstance
+                    .data
+                    .labels
+                    .shift();
 
 
-                    chartInstance.data
-                        .datasets[0]
-                        .data.shift();
+
+                    chartInstance
+                    .data
+                    .datasets[0]
+                    .data
+                    .shift();
 
 
-                    chartInstance.data
-                        .datasets[1]
-                        .data.shift();
+
+                    chartInstance
+                    .data
+                    .datasets[1]
+                    .data
+                    .shift();
+
 
                 }
 
 
-                chartInstance.data
-                    .labels.push(
-                        timeOnly
-                    );
+
+                chartInstance
+                .data
+                .labels
+                .push(
+                    timeOnly
+                );
 
 
-                chartInstance.data
-                    .datasets[0]
-                    .data.push(
-                        Number(
-                            data.Suhu
-                        )
-                    );
+
+                chartInstance
+                .data
+                .datasets[0]
+                .data
+                .push(
+
+                    Number(
+                        data.Suhu
+                    )
+
+                );
 
 
-                chartInstance.data
-                    .datasets[1]
-                    .data.push(
-                        Number(
-                            data.Kelembaban
-                        )
-                    );
+
+                chartInstance
+                .data
+                .datasets[1]
+                .data
+                .push(
+
+                    Number(
+                        data.Kelembaban
+                    )
+
+                );
 
 
-                chartInstance.update();
+
+                chartInstance
+                .update();
+
 
             }
+
 
         },
 
 
+
         function (error) {
 
+
             console.error(
+
                 "Firebase Monitoring:",
+
                 error
+
             );
 
 
+
             const banner =
-                document.getElementById(
+
+                document
+                .getElementById(
                     "statusBanner"
                 );
 
 
+
             banner.innerText =
+
                 "GAGAL MEMBACA FIREBASE";
 
 
-            banner.style.backgroundColor =
-                "var(--red)";
+            banner.style
+                .backgroundColor =
+
+                    "var(--red)";
 
 
-            banner.style.color =
-                "#FFFFFF";
+            banner.style
+                .color =
+
+                    "#FFFFFF";
+
 
         }
 
     );
 
 
-    /* =============================
+
+    /* =================================
        LOG DATA
-    ============================= */
+    ================================= */
+
 
     activeLogRef.on(
 
@@ -1452,14 +3084,20 @@ function attachFirebaseListeners(
 
         function (snapshot) {
 
+
             const logs =
+
                 snapshot.val();
 
 
+
             const tbody =
-                document.getElementById(
+
+                document
+                .getElementById(
                     "logTableBody"
                 );
+
 
 
             tbody.innerHTML =
@@ -1470,328 +3108,556 @@ function attachFirebaseListeners(
                 [];
 
 
-            if (logs) {
 
-                Object.keys(
+            if (
+                logs
+            ) {
+
+
+                Object
+                .keys(
                     logs
-                ).forEach(
+                )
+                .forEach(
 
                     function (key) {
 
+
                         const rowData =
-                            logs[key] ||
+
+                            logs[key]
+                            ||
                             {};
 
 
+
                         cachedLogData
-                            .push(
-                                rowData
-                            );
+                        .push(
+                            rowData
+                        );
+
 
 
                         const suhuLog =
 
-                            rowData.Suhu !== undefined &&
-                            rowData.Suhu !== null
 
-                            ? Number(
+                            rowData.Suhu
+                            !== undefined
+
+                            &&
+
+                            rowData.Suhu
+                            !== null
+
+
+                            ?
+
+
+                            Number(
                                 rowData.Suhu
-                            ).toFixed(1)
+                            )
+                            .toFixed(1)
 
-                            : "-";
+
+                            :
+
+
+                            "-";
+
 
 
                         const humLog =
 
-                            rowData.Kelembaban !== undefined &&
-                            rowData.Kelembaban !== null
 
-                            ? Number(
+                            rowData.Kelembaban
+                            !== undefined
+
+                            &&
+
+                            rowData.Kelembaban
+                            !== null
+
+
+                            ?
+
+
+                            Number(
                                 rowData.Kelembaban
-                            ).toFixed(1)
+                            )
+                            .toFixed(1)
 
-                            : "-";
+
+                            :
+
+
+                            "-";
+
 
 
                         const tagColor =
 
-                            rowData.Status ===
+
+                            rowData.Status
+                            ===
                             "NORMAL"
 
-                            ? "var(--green)"
 
-                            : "var(--red)";
+                            ?
+
+
+                            "var(--green)"
+
+
+                            :
+
+
+                            "var(--red)";
+
 
 
                         tbody.innerHTML += `
 
+
                             <tr>
 
-                                <td>
-                                    ${rowData.Waktu || "-"}
-                                </td>
 
                                 <td>
+
+                                    ${
+                                        rowData.Waktu
+                                        ||
+                                        "-"
+                                    }
+
+                                </td>
+
+
+                                <td>
+
                                     ${suhuLog}
+
                                 </td>
 
+
                                 <td>
+
                                     ${humLog}
+
                                 </td>
 
+
                                 <td>
+
 
                                     <span
-                                        class="status-tag"
-                                        style="background:${tagColor}"
+
+                                        class=
+                                        "status-tag"
+
+                                        style=
+                                        "background:${tagColor}"
+
                                     >
 
-                                        ${rowData.Status || "-"}
+
+                                        ${
+                                            rowData.Status
+                                            ||
+                                            "-"
+                                        }
+
 
                                     </span>
 
+
                                 </td>
+
 
                             </tr>
 
+
                         `;
+
 
                     }
 
                 );
 
+
             }
+
 
             else {
 
+
                 tbody.innerHTML = `
+
 
                     <tr>
 
+
                         <td
+
                             colspan="4"
-                            style="text-align:center">
+
+                            style="
+                                text-align:center
+                            "
+
+                        >
+
 
                             Belum ada log data
                             terjadwal tersimpan.
 
+
                         </td>
+
 
                     </tr>
 
+
                 `;
 
+
             }
+
 
         },
 
 
         function (error) {
 
+
             console.error(
+
                 "Firebase LogData:",
+
                 error
+
             );
+
 
         }
 
     );
 
+
 }
 
 
-/* ========================================================
-   PINDAH HARDWARE
-======================================================== */
+
+/* =====================================================
+   GANTI HARDWARE
+===================================================== */
+
 
 function switchHardwareNode() {
 
+
     currentNode =
-        document.getElementById(
+
+        document
+        .getElementById(
             "nodeSelect"
-        ).value;
+        )
+        .value;
 
 
-    if (chartInstance) {
 
-        chartInstance.data.labels =
+    if (
+        chartInstance
+    ) {
+
+
+        chartInstance
+        .data
+        .labels =
             [];
 
 
-        chartInstance.data.datasets[0]
-            .data = [];
+
+        chartInstance
+        .data
+        .datasets[0]
+        .data =
+            [];
 
 
-        chartInstance.data.datasets[1]
-            .data = [];
+
+        chartInstance
+        .data
+        .datasets[1]
+        .data =
+            [];
 
 
-        chartInstance.update();
+
+        chartInstance
+        .update();
+
 
     }
+
 
 
     attachFirebaseListeners(
         currentNode
     );
 
+
 }
 
 
-/* ========================================================
+
+/* =====================================================
    EXPORT CSV
-======================================================== */
+===================================================== */
+
 
 function exportToCSV() {
 
+
     if (
-        cachedLogData.length === 0
+
+        cachedLogData
+        .length
+        ===
+        0
+
     ) {
 
+
         alert(
+
             "Belum ada data log tersimpan."
+
         );
 
+
         return;
+
 
     }
 
 
+
     let csv =
 
-        "Waktu Pencatatan," +
-        "Suhu (C)," +
-        "Kelembaban (%RH)," +
+
+        "Waktu Pencatatan,"
+        +
+        "Suhu (C),"
+        +
+        "Kelembaban (%RH),"
+        +
         "Status Ruangan\n";
 
 
-    cachedLogData.forEach(
+
+    cachedLogData
+    .forEach(
 
         function (item) {
 
+
             csv +=
 
-                `"${item.Waktu || ""}",` +
 
-                `"${item.Suhu ?? ""}",` +
+                `"${item.Waktu || ""}",`
 
-                `"${item.Kelembaban ?? ""}",` +
+
+                +
+
+
+                `"${item.Suhu ?? ""}",`
+
+
+                +
+
+
+                `"${item.Kelembaban ?? ""}",`
+
+
+                +
+
 
                 `"${item.Status || ""}"\n`;
+
 
         }
 
     );
 
 
+
     const blob =
+
         new Blob(
+
             [csv],
+
             {
+
                 type:
                     "text/csv;charset=utf-8;"
+
             }
+
         );
 
 
+
     const url =
+
         URL.createObjectURL(
             blob
         );
 
 
+
     const a =
+
         document.createElement(
             "a"
         );
+
 
 
     a.href =
         url;
 
 
+
     a.download =
-        "Laporan_Ruang_Operasi_" +
-        currentNode +
+
+        "Laporan_Ruang_Operasi_"
+        +
+        currentNode
+        +
         ".csv";
 
 
+
     document.body
-        .appendChild(
-            a
-        );
+    .appendChild(
+        a
+    );
+
 
 
     a.click();
 
 
+
     document.body
-        .removeChild(
-            a
-        );
+    .removeChild(
+        a
+    );
 
 
-    URL.revokeObjectURL(
+
+    URL
+    .revokeObjectURL(
         url
     );
+
 
 }
 
 
-/* ========================================================
+
+/* =====================================================
    AUTH STATE
-======================================================== */
+===================================================== */
+
 
 auth.onAuthStateChanged(
 
     function (user) {
 
-        if (user) {
 
-            loginScreen.style.display =
+        /* LOGIN BERHASIL */
+
+
+        if (
+            user
+        ) {
+
+
+            loginScreen
+            .style
+            .display =
+
                 "none";
 
 
-            dashboardApp.style.display =
+
+            dashboardApp
+            .style
+            .display =
+
                 "block";
 
 
-            /*
-             Chart dibuat setelah dashboard tampil
-             supaya ukuran canvas terbaca normal.
-            */
 
             initChart();
 
 
-            chartInstance.data.labels =
+
+            chartInstance
+            .data
+            .labels =
                 [];
 
 
-            chartInstance.data.datasets[0]
-                .data = [];
+
+            chartInstance
+            .data
+            .datasets[0]
+            .data =
+                [];
 
 
-            chartInstance.data.datasets[1]
-                .data = [];
+
+            chartInstance
+            .data
+            .datasets[1]
+            .data =
+                [];
 
 
-            chartInstance.update();
+
+            chartInstance
+            .update();
+
 
 
             attachFirebaseListeners(
+
                 currentNode
+
             );
+
 
         }
 
+
+
+        /* BELUM LOGIN */
+
+
         else {
+
 
             if (
                 activeMonitoringRef
             ) {
 
-                activeMonitoringRef.off();
+
+                activeMonitoringRef
+                .off();
+
 
             }
 
@@ -1800,37 +3666,76 @@ auth.onAuthStateChanged(
                 activeLogRef
             ) {
 
-                activeLogRef.off();
+
+                activeLogRef
+                .off();
+
 
             }
 
 
-            dashboardApp.style.display =
+
+            dashboardApp
+            .style
+            .display =
+
                 "none";
 
 
-            loginScreen.style.display =
+
+            loginScreen
+            .style
+            .display =
+
                 "flex";
+
+
+
+            /* RESET FORM */
+
+
+            loginUsername.value =
+                "";
+
 
 
             loginPassword.value =
                 "";
 
 
+
+            loginPassword.type =
+                "password";
+
+
+
+            togglePassword
+            .innerText =
+
+                "👁";
+
+
+
             humanCheck.checked =
                 false;
+
 
 
             loginButton.disabled =
                 true;
 
+
         }
+
 
     }
 
 );
 
+
 </script>
 
+
 </body>
+
 </html>
