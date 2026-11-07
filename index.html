@@ -5,710 +5,1837 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Monitoring Ruang Operasi</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
 <style>
-:root{
---espresso:#3E2723;--petal:#F4C9D6;
---ivory:#F5F0E6;--bg:#FAF6F0;
---white:#fff;--green:#2E7D32;
---red:#D32F2F;--orange:#F57C00;
---shadow:0 12px 28px rgba(62,39,35,.08)
+:root {
+  --espresso:#3E2723;
+  --petal:#F4C9D6;
+  --ivory:#F5F0E6;
+  --bg:#FAF6F0;
+  --white:#FFFFFF;
+  --green:#2E7D32;
+  --red:#D32F2F;
+  --orange:#F57C00;
+  --shadow:0 12px 28px rgba(62,39,35,.08);
 }
-*{box-sizing:border-box;font-family:Montserrat,sans-serif}
-body{margin:0;padding:24px;background:var(--bg);color:var(--espresso)}
-button,input,select{font:inherit}
-button{cursor:pointer}
-#loginScreen{min-height:calc(100vh - 48px);display:flex;justify-content:center;align-items:center}
-.login-card{width:100%;max-width:430px;background:white;border:3px solid var(--ivory);border-radius:28px;padding:32px;box-shadow:var(--shadow)}
-.login-icon{text-align:center;font-size:40px}
-.login-card h1{text-align:center;font-size:24px;font-weight:900;margin:8px 0}
-.login-subtitle{text-align:center;font-size:12px;line-height:1.7;opacity:.7;margin-bottom:26px}
-.form-group{margin-bottom:17px}
-.form-group label{display:block;font-size:12px;font-weight:800;margin-bottom:7px}
-.form-group input{width:100%;padding:14px;border:2px solid var(--ivory);border-radius:14px;outline:none}
-.form-group input:focus{border-color:var(--petal)}
-.password-wrap{position:relative}
-.password-wrap input{padding-right:55px}
-.toggle-password{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;padding:10px}
-.human-check{display:flex;gap:11px;align-items:center;background:var(--ivory);padding:14px;border-radius:14px;margin:18px 0;font-size:13px;font-weight:800}
-.human-check input{width:20px;height:20px;accent-color:var(--espresso)}
-.btn-login,.btn-export{border:0;background:var(--espresso);color:var(--petal);border-radius:15px;padding:14px 20px;font-size:12px;font-weight:900}
-.btn-login{width:100%}
-button:disabled{opacity:.45;cursor:not-allowed}
-.login-error{min-height:20px;color:var(--red);font-size:12px;text-align:center;margin-top:12px}
-.login-note{text-align:center;font-size:10px;opacity:.6;margin-top:15px}
-#dashboardApp{display:none}
-.container{max-width:1150px;margin:auto}
-.app-header{background:var(--espresso);color:var(--ivory);padding:30px;border-radius:28px;box-shadow:var(--shadow);margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.app-title h1{color:var(--petal);font-size:22px;font-weight:900;margin:0 0 8px}
-.app-title p{font-size:12px;font-weight:600;margin:0;line-height:1.6}
-.header-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.hardware-selector{background:var(--petal);color:var(--espresso);border-radius:20px;padding:10px 16px;font-size:12px;font-weight:800}
-.hardware-selector select{border:0;background:transparent;color:var(--espresso);font-weight:800;max-width:190px}
-.btn-logout{background:white;color:var(--espresso);border:0;border-radius:15px;padding:12px 18px;font-size:11px;font-weight:900}
-.status-banner{padding:20px;border-radius:22px;background:var(--petal);font-size:18px;font-weight:900;text-align:center;margin-bottom:24px;box-shadow:var(--shadow)}
-.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-bottom:24px}
-.metric-card{background:var(--ivory);padding:28px;border-radius:26px;border:3px solid white;box-shadow:var(--shadow)}
-.metric-header{font-size:14px;font-weight:900;margin-bottom:15px}
-.metric-value{font-size:52px;font-weight:900;margin-bottom:14px}
-.metric-unit{font-size:22px;color:#795548}
-.metric-range{display:inline-block;background:white;border-radius:12px;padding:7px 13px;font-size:11px;font-weight:700}
-.panel{background:white;border:3px solid var(--ivory);border-radius:28px;padding:28px;margin-bottom:24px;box-shadow:var(--shadow)}
-.panel-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:2px dashed var(--petal);padding-bottom:14px;margin-bottom:20px}
-.panel-header h2{font-size:16px;font-weight:900;margin:0}
-.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.chart-box{background:white;border:2px solid var(--ivory);border-radius:22px;padding:18px;min-width:0}
-.chart-box h3{text-align:center;font-size:14px;font-weight:900;margin:0 0 14px}
-.chart-area{height:270px;position:relative}
-.chart-note{font-size:11px;opacity:.7;text-align:center;margin-top:10px;line-height:1.6}
-.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
-.control{display:flex;flex-direction:column;gap:7px}
-.control label{font-size:11px;font-weight:800}
-.control select,.control input{border:2px solid var(--ivory);border-radius:12px;padding:11px;background:white;color:var(--espresso);font-size:12px;max-width:100%}
-.table-responsive{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{background:var(--ivory);padding:14px;text-align:left}
-td{padding:14px;border-bottom:1px solid var(--ivory);font-weight:600}
-.status-tag{display:inline-block;padding:6px 10px;border-radius:10px;background:var(--petal);font-size:10px;font-weight:800}
-.sync-time{text-align:center;font-size:11px;font-weight:700;opacity:.75;margin:10px 0 25px}
-.message{font-size:11px;line-height:1.6;opacity:.75;margin-top:12px}
-.mode-label{background:var(--ivory);border-radius:12px;padding:9px 13px;font-size:11px;font-weight:800}
-@media(max-width:850px){.chart-grid{grid-template-columns:1fr}}
-@media(max-width:600px){body{padding:14px}.app-header,.panel{padding:20px}.metric-value{font-size:42px}}
+
+* {
+  box-sizing:border-box;
+  font-family:Montserrat,sans-serif;
+}
+
+body {
+  margin:0;
+  padding:24px;
+  background:var(--bg);
+  color:var(--espresso);
+}
+
+button,input,select {
+  font:inherit;
+}
+
+button {
+  cursor:pointer;
+}
+
+#loginScreen {
+  min-height:calc(100vh - 48px);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.login-card {
+  width:100%;
+  max-width:430px;
+  background:white;
+  border:3px solid var(--ivory);
+  border-radius:28px;
+  padding:32px;
+  box-shadow:var(--shadow);
+}
+
+.login-icon {
+  text-align:center;
+  font-size:40px;
+}
+
+.login-card h1 {
+  text-align:center;
+  font-size:24px;
+  font-weight:900;
+  margin:8px 0;
+}
+
+.login-subtitle {
+  text-align:center;
+  font-size:12px;
+  line-height:1.7;
+  opacity:.7;
+  margin-bottom:26px;
+}
+
+.form-group {
+  margin-bottom:17px;
+}
+
+.form-group label {
+  display:block;
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:7px;
+}
+
+.form-group input {
+  width:100%;
+  padding:14px;
+  border:2px solid var(--ivory);
+  border-radius:14px;
+  outline:none;
+}
+
+.form-group input:focus {
+  border-color:var(--petal);
+}
+
+.password-wrap {
+  position:relative;
+}
+
+.password-wrap input {
+  padding-right:55px;
+}
+
+.toggle-password {
+  position:absolute;
+  right:8px;
+  top:50%;
+  transform:translateY(-50%);
+  border:0;
+  background:transparent;
+  padding:10px;
+}
+
+.human-check {
+  display:flex;
+  gap:11px;
+  align-items:center;
+  background:var(--ivory);
+  padding:14px;
+  border-radius:14px;
+  margin:18px 0;
+  font-size:13px;
+  font-weight:800;
+}
+
+.human-check input {
+  width:20px;
+  height:20px;
+  accent-color:var(--espresso);
+}
+
+.btn-login,.btn-export {
+  border:0;
+  background:var(--espresso);
+  color:var(--petal);
+  border-radius:15px;
+  padding:14px 20px;
+  font-size:12px;
+  font-weight:900;
+}
+
+.btn-login {
+  width:100%;
+}
+
+button:disabled {
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.login-error {
+  min-height:20px;
+  color:var(--red);
+  font-size:12px;
+  text-align:center;
+  margin-top:12px;
+}
+
+.login-note {
+  text-align:center;
+  font-size:10px;
+  opacity:.6;
+  margin-top:15px;
+}
+
+#dashboardApp {
+  display:none;
+}
+
+.container {
+  max-width:1150px;
+  margin:auto;
+}
+
+.app-header {
+  background:var(--espresso);
+  color:var(--ivory);
+  padding:30px;
+  border-radius:28px;
+  box-shadow:var(--shadow);
+  margin-bottom:24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+.app-title h1 {
+  color:var(--petal);
+  font-size:22px;
+  font-weight:900;
+  margin:0 0 8px;
+}
+
+.app-title p {
+  font-size:12px;
+  font-weight:600;
+  margin:0;
+  line-height:1.6;
+}
+
+.header-controls {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.hardware-selector {
+  background:var(--petal);
+  color:var(--espresso);
+  border-radius:20px;
+  padding:10px 16px;
+  font-size:12px;
+  font-weight:800;
+}
+
+.hardware-selector select {
+  border:0;
+  background:transparent;
+  color:var(--espresso);
+  font-weight:800;
+  max-width:190px;
+}
+
+.btn-logout {
+  background:white;
+  color:var(--espresso);
+  border:0;
+  border-radius:15px;
+  padding:12px 18px;
+  font-size:11px;
+  font-weight:900;
+}
+
+.status-banner {
+  padding:20px;
+  border-radius:22px;
+  background:var(--petal);
+  font-size:18px;
+  font-weight:900;
+  text-align:center;
+  margin-bottom:24px;
+  box-shadow:var(--shadow);
+}
+
+.metrics-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:24px;
+  margin-bottom:24px;
+}
+
+.metric-card {
+  background:var(--ivory);
+  padding:28px;
+  border-radius:26px;
+  border:3px solid white;
+  box-shadow:var(--shadow);
+}
+
+.metric-header {
+  font-size:14px;
+  font-weight:900;
+  margin-bottom:15px;
+}
+
+.metric-value {
+  font-size:52px;
+  font-weight:900;
+  margin-bottom:14px;
+}
+
+.metric-unit {
+  font-size:22px;
+  color:#795548;
+}
+
+.metric-range {
+  display:inline-block;
+  background:white;
+  border-radius:12px;
+  padding:7px 13px;
+  font-size:11px;
+  font-weight:700;
+}
+
+.panel {
+  background:white;
+  border:3px solid var(--ivory);
+  border-radius:28px;
+  padding:28px;
+  margin-bottom:24px;
+  box-shadow:var(--shadow);
+}
+
+.panel-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  border-bottom:2px dashed var(--petal);
+  padding-bottom:14px;
+  margin-bottom:20px;
+}
+
+.panel-header h2 {
+  font-size:16px;
+  font-weight:900;
+  margin:0;
+}
+
+.chart-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+
+.chart-box {
+  background:white;
+  border:2px solid var(--ivory);
+  border-radius:22px;
+  padding:18px;
+  min-width:0;
+}
+
+.chart-box h3 {
+  text-align:center;
+  font-size:14px;
+  font-weight:900;
+  margin:0 0 14px;
+}
+
+.chart-area {
+  height:290px;
+  position:relative;
+}
+
+.chart-note {
+  font-size:11px;
+  opacity:.7;
+  text-align:center;
+  margin-top:10px;
+  line-height:1.6;
+}
+
+.controls {
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  align-items:end;
+}
+
+.control {
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.control label {
+  font-size:11px;
+  font-weight:800;
+}
+
+.control select,.control input {
+  border:2px solid var(--ivory);
+  border-radius:12px;
+  padding:11px;
+  background:white;
+  color:var(--espresso);
+  font-size:12px;
+}
+
+.table-responsive {
+  overflow-x:auto;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+
+th {
+  background:var(--ivory);
+  padding:14px;
+  text-align:left;
+}
+
+td {
+  padding:14px;
+  border-bottom:1px solid var(--ivory);
+  font-weight:600;
+}
+
+.status-tag {
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:10px;
+  background:var(--petal);
+  font-size:10px;
+  font-weight:800;
+}
+
+.sync-time {
+  text-align:center;
+  font-size:11px;
+  font-weight:700;
+  opacity:.75;
+  margin:10px 0 25px;
+}
+
+.message {
+  font-size:11px;
+  line-height:1.6;
+  opacity:.75;
+  margin-top:12px;
+}
+
+.mode-label {
+  background:var(--ivory);
+  border-radius:12px;
+  padding:9px 13px;
+  font-size:11px;
+  font-weight:800;
+}
+
+@media(max-width:850px) {
+  .chart-grid {
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:600px) {
+  body {
+    padding:14px;
+  }
+  .app-header,.panel {
+    padding:20px;
+  }
+  .metric-value {
+    font-size:42px;
+  }
+}
 </style>
 </head>
+
 <body>
 
 <section id="loginScreen">
-<div class="login-card">
-<div class="login-icon">🔐</div>
-<h1>Login Monitoring</h1>
-<p class="login-subtitle">Masuk untuk melihat dashboard monitoring suhu dan kelembaban ruang operasi.</p>
-<form id="loginForm">
-<div class="form-group">
-<label for="loginUsername">Username</label>
-<input id="loginUsername" autocomplete="username" placeholder="Masukkan username" required>
-</div>
-<div class="form-group">
-<label for="loginPassword">Password</label>
-<div class="password-wrap">
-<input id="loginPassword" type="password" autocomplete="current-password" placeholder="Masukkan password" required>
-<button type="button" class="toggle-password" id="togglePassword">👁</button>
-</div>
-</div>
-<label class="human-check">
-<input type="checkbox" id="humanCheck">
-Saya bukan robot
-</label>
-<button class="btn-login" id="loginButton" disabled>MASUK KE DASHBOARD</button>
-<div id="loginError" class="login-error"></div>
-</form>
-<div class="login-note">Login diamankan menggunakan Firebase Authentication.</div>
-</div>
+  <div class="login-card">
+    <div class="login-icon">🔐</div>
+    <h1>Login Monitoring</h1>
+    <p class="login-subtitle">
+      Masuk untuk melihat dashboard monitoring
+      suhu dan kelembaban ruang operasi.
+    </p>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="loginUsername">Username</label>
+        <input id="loginUsername"
+          autocomplete="username"
+          placeholder="Masukkan username" required>
+      </div>
+
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <div class="password-wrap">
+          <input id="loginPassword"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Masukkan password" required>
+          <button type="button"
+            class="toggle-password"
+            id="togglePassword">👁</button>
+        </div>
+      </div>
+
+      <label class="human-check">
+        <input type="checkbox" id="humanCheck">
+        Saya bukan robot
+      </label>
+
+      <button class="btn-login" id="loginButton" disabled>
+        MASUK KE DASHBOARD
+      </button>
+
+      <div id="loginError" class="login-error"></div>
+    </form>
+
+    <div class="login-note">
+      Login diamankan menggunakan Firebase Authentication.
+    </div>
+  </div>
 </section>
 
 <main id="dashboardApp" class="container">
+
 <header class="app-header">
-<div class="app-title">
-<h1>🧸 MONITORING RUANG OPERASI</h1>
-<p>Standar Permenkes No. 2 Tahun 2023<br>Suhu: 19–24°C | Kelembaban: 40–60%RH</p>
-</div>
-<div class="header-controls">
-<div class="hardware-selector">
-<label for="nodeSelect">⚡ DEVICE:</label>
-<select id="nodeSelect">
-<option value="Hardware_1">Ruang Operasi 1 (Utama)</option>
-<option value="Hardware_2">Ruang Operasi 2</option>
-<option value="Hardware_3">Ruang Operasi 3</option>
-<option value="Hardware_4">Ruang Operasi 4</option>
-<option value="Hardware_5">Ruang Operasi 5</option>
-</select>
-</div>
-<button class="btn-logout" id="logoutButton">KELUAR</button>
-</div>
+  <div class="app-title">
+    <h1>🧸 MONITORING RUANG OPERASI</h1>
+    <p>
+      Standar Permenkes No. 2 Tahun 2023<br>
+      Suhu: 19–24°C | Kelembaban: 40–60%RH
+    </p>
+  </div>
+
+  <div class="header-controls">
+    <div class="hardware-selector">
+      <label for="nodeSelect">⚡ DEVICE:</label>
+      <select id="nodeSelect">
+        <option value="Hardware_1">Ruang Operasi 1 (Utama)</option>
+        <option value="Hardware_2">Ruang Operasi 2</option>
+        <option value="Hardware_3">Ruang Operasi 3</option>
+        <option value="Hardware_4">Ruang Operasi 4</option>
+        <option value="Hardware_5">Ruang Operasi 5</option>
+      </select>
+    </div>
+    <button class="btn-logout" id="logoutButton">KELUAR</button>
+  </div>
 </header>
 
-<div class="status-banner" id="statusBanner">MENGHUBUNGKAN KE FIREBASE...</div>
+<div class="status-banner" id="statusBanner">
+  MENGHUBUNGKAN KE FIREBASE...
+</div>
 
 <section class="metrics-grid">
-<div class="metric-card">
-<div class="metric-header">🌡️ SUHU RUANGAN</div>
-<div class="metric-value"><span id="valSuhu">--</span><span class="metric-unit"> °C</span></div>
-<div class="metric-range">Batas Normal: 19.0°C – 24.0°C</div>
-</div>
-<div class="metric-card">
-<div class="metric-header">💧 KELEMBABAN UDARA</div>
-<div class="metric-value"><span id="valHum">--</span><span class="metric-unit"> %RH</span></div>
-<div class="metric-range">Batas Normal: 40%RH – 60%RH</div>
-</div>
+  <div class="metric-card">
+    <div class="metric-header">🌡️ SUHU RUANGAN</div>
+    <div class="metric-value">
+      <span id="valSuhu">--</span>
+      <span class="metric-unit">°C</span>
+    </div>
+    <div class="metric-range">
+      Batas Normal: 19.0°C – 24.0°C
+    </div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-header">💧 KELEMBABAN UDARA</div>
+    <div class="metric-value">
+      <span id="valHum">--</span>
+      <span class="metric-unit">%RH</span>
+    </div>
+    <div class="metric-range">
+      Batas Normal: 40%RH – 60%RH
+    </div>
+  </div>
 </section>
 
 <section class="panel">
-<div class="panel-header">
-<h2>📈 Grafik Pemantauan 24 Jam</h2>
-<span class="mode-label" id="modeLabel">Mode: Menunggu data</span>
-</div>
-<div class="chart-grid">
-<div class="chart-box">
-<h3>🌡️ Grafik Suhu</h3>
-<div class="chart-area"><canvas id="tempChart"></canvas></div>
-<div class="chart-note">Hari ini, 00.00–24.00 WIB. Titik sesuai waktu pengukuran asli.</div>
-</div>
-<div class="chart-box">
-<h3>💧 Grafik Kelembaban</h3>
-<div class="chart-area"><canvas id="humChart"></canvas></div>
-<div class="chart-note">Penanda waktu setiap jam. Tidak membuat data pengukuran palsu.</div>
-</div>
-</div>
-<p class="message" id="chartMessage"></p>
+  <div class="panel-header">
+    <h2>📈 Grafik Pemantauan 24 Jam</h2>
+    <span class="mode-label" id="modeLabel">
+      Mode: Menunggu data
+    </span>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-box">
+      <h3>🌡️ Grafik Suhu</h3>
+      <div class="chart-area">
+        <canvas id="tempChart"></canvas>
+      </div>
+      <div class="chart-note">
+        Grafik hari ini, pukul 00.00–24.00 WIB.
+      </div>
+    </div>
+
+    <div class="chart-box">
+      <h3>💧 Grafik Kelembaban</h3>
+      <div class="chart-area">
+        <canvas id="humChart"></canvas>
+      </div>
+      <div class="chart-note">
+        Titik sesuai waktu pengukuran asli.
+      </div>
+    </div>
+  </div>
+
+  <p class="message" id="chartMessage"></p>
 </section>
 
 <section class="panel">
-<div class="panel-header">
-<h2>📋 Log Data Hari Ini</h2>
-<span class="mode-label" id="tableMode">Normal: 07.00, 14.00, 21.00 WIB</span>
-</div>
-<div class="table-responsive">
-<table>
-<thead>
-<tr><th>Waktu Pencatatan</th><th>Suhu (°C)</th><th>Kelembaban (%RH)</th><th>Status Ruangan</th></tr>
-</thead>
-<tbody id="logTableBody">
-<tr><td colspan="4">Memuat data...</td></tr>
-</tbody>
-</table>
-</div>
+  <div class="panel-header">
+    <h2>📋 Log Data Hari Ini</h2>
+    <span class="mode-label" id="tableMode">
+      Normal: 07.00, 14.00, 21.00 WIB
+    </span>
+  </div>
+
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Waktu Pencatatan</th>
+          <th>Suhu (°C)</th>
+          <th>Kelembaban (%RH)</th>
+          <th>Status Ruangan</th>
+        </tr>
+      </thead>
+      <tbody id="logTableBody">
+        <tr><td colspan="4">Memuat data...</td></tr>
+      </tbody>
+    </table>
+  </div>
 </section>
 
 <section class="panel">
-<div class="panel-header">
-<h2>📥 Log Data dan Download Excel</h2>
-</div>
-<div class="controls">
-<div class="control">
-<label for="exportMode">Jenis Log Data</label>
-<select id="exportMode">
-<option value="normal">LogDataNormal (3 Waktu)</option>
-<option value="test">LogDataPengujian (5 Menit)</option>
-</select>
-</div>
-<div class="control">
-<label for="exportMonth">Bulan dan Tahun</label>
-<input id="exportMonth" type="month">
-</div>
-<button class="btn-export" id="exportButton">📥 DOWNLOAD EXCEL (.xlsx)</button>
-</div>
-<p class="message" id="exportMessage">File Excel berisi satu worksheet, tabel data asli, dan dua grafik Excel yang terhubung ke sel.</p>
+  <div class="panel-header">
+    <h2>📥 Log Data dan Download Excel</h2>
+  </div>
+
+  <div class="controls">
+    <div class="control">
+      <label for="exportMode">Jenis Log Data</label>
+      <select id="exportMode">
+        <option value="normal">LogDataNormal (3 Waktu)</option>
+        <option value="test">LogDataPengujian (5 Menit)</option>
+      </select>
+    </div>
+
+    <div class="control">
+      <label for="exportMonth">Bulan dan Tahun</label>
+      <input id="exportMonth" type="month">
+    </div>
+
+    <button class="btn-export" id="exportButton">
+      📥 DOWNLOAD EXCEL (.xlsx)
+    </button>
+  </div>
+
+  <p class="message" id="exportMessage">
+    Satu worksheet berisi data Firebase dan dua grafik Excel.
+  </p>
 </section>
 
-<div class="sync-time" id="syncContainer">
-✨ Waktu Data Terakhir: <span id="syncTime">--</span>
+<div class="sync-time" id="syncContainer" style="display:none">
+  ✨ Waktu Data Terakhir:
+  <span id="syncTime">--</span>
 </div>
+
 </main>
 
 <script>
 "use strict";
 
-const firebaseConfig={
-apiKey:"AIzaSyC44n4OsHy_iuoVbWYkK0VbDLcZCVAtysA",
-authDomain:"diagnostik-monitoring.firebaseapp.com",
-databaseURL:"https://diagnostik-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
-projectId:"diagnostik-monitoring",
-storageBucket:"diagnostik-monitoring.firebasestorage.app",
-messagingSenderId:"823689373846",
-appId:"1:823689373846:web:23f175ea86d2a5ea823ab7",
-measurementId:"G-0MCE5RWW9Q"
+/* ========================================
+   FIREBASE CONFIG
+======================================== */
+
+const firebaseConfig = {
+  apiKey:"AIzaSyC44n4OsHy_iuoVbWYkK0VbDLcZCVAtysA",
+  authDomain:"diagnostik-monitoring.firebaseapp.com",
+  databaseURL:"https://diagnostik-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"diagnostik-monitoring",
+  storageBucket:"diagnostik-monitoring.firebasestorage.app",
+  messagingSenderId:"823689373846",
+  appId:"1:823689373846:web:23f175ea86d2a5ea823ab7",
+  measurementId:"G-0MCE5RWW9Q"
 };
 
 firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.database();
 
-const LOGIN_USERNAME="marnar";
-// Pertahankan alamat autentikasi dari kode website lama.
-// Jika login gagal, verifikasi email ini pada Firebase Authentication.
-const FIREBASE_LOGIN_EMAIL="marnar@diagnostik-monitoring.example.com";
+const auth = firebase.auth();
+const db = firebase.database();
 
-const $=id=>document.getElementById(id);
-let currentNode="Hardware_1";
-let monitoring=null,normalLogs=[],testLogs=[];
-let monitoringLoaded=false,normalLoaded=false,testLoaded=false;
-let monitoringRef=null,normalRef=null,testRef=null;
-let tempChart=null,humChart=null;
-let serverOffset=0,connected=false,listenerGeneration=0;
-let currentDay="";
+const LOGIN_USERNAME = "marnar";
 
-function validNumber(v){
-if(v===null||v===undefined||v==="")return null;
-const n=Number(v);return Number.isFinite(n)?n:null;
+// PENTING:
+// Pastikan email ini benar-benar terdaftar
+// di Firebase Authentication.
+const FIREBASE_LOGIN_EMAIL =
+  "marnar@diagnostik-monitoring.example.com";
+
+const $ = id => document.getElementById(id);
+
+let currentNode = "Hardware_1";
+let monitoring = null;
+let normalLogs = [];
+let testLogs = [];
+
+let monitoringLoaded = false;
+let normalLoaded = false;
+let testLoaded = false;
+
+let monitoringRef = null;
+let normalRef = null;
+let testRef = null;
+
+let tempChart = null;
+let humChart = null;
+
+let serverOffset = 0;
+let connected = false;
+let listenerGeneration = 0;
+let currentDay = "";
+
+/* ========================================
+   WAKTU INDONESIA WIB
+======================================== */
+
+function wibParts(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone:"Asia/Jakarta",
+    year:"numeric",
+    month:"2-digit",
+    day:"2-digit",
+    hour:"2-digit",
+    minute:"2-digit",
+    second:"2-digit",
+    hourCycle:"h23"
+  }).formatToParts(date);
+
+  const result = {};
+  for (const p of parts) {
+    if (p.type !== "literal") {
+      result[p.type] = p.value;
+    }
+  }
+  return result;
 }
 
-function wibParts(date=new Date()){
-const p=new Intl.DateTimeFormat("en-GB",{
-timeZone:"Asia/Jakarta",year:"numeric",month:"2-digit",
-day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",
-hourCycle:"h23"
-}).formatToParts(date);
-const o={};
-for(const x of p)if(x.type!=="literal")o[x.type]=x.value;
-return o;
+function dayKey(date = new Date()) {
+  const p = wibParts(date);
+  return `${p.year}-${p.month}-${p.day}`;
 }
-function dayKey(date=new Date()){
-const p=wibParts(date);
-return `${p.year}-${p.month}-${p.day}`;
+
+function formatWib(date) {
+  const p = wibParts(date);
+  return `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}:${p.second}`;
 }
-function formatWib(date){
-const p=wibParts(date);
-return `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}:${p.second}`;
+
+function parseDate(value) {
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+
+  if (typeof value === "number") {
+    const d = new Date(
+      value < 1e11 ? value * 1000 : value
+    );
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  if (typeof value !== "string") return null;
+
+  let m = value.match(
+    /^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/
+  );
+
+  if (m) {
+    const d = new Date(Date.UTC(
+      +m[3], +m[2]-1, +m[1],
+      +m[4]-7, +m[5], +(m[6]||0)
+    ));
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  m = value.match(
+    /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/
+  );
+
+  if (m) {
+    return new Date(Date.UTC(
+      +m[1], +m[2]-1, +m[3],
+      +m[4]-7, +m[5], +(m[6]||0)
+    ));
+  }
+
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
 }
-function parseDate(v){
-if(v instanceof Date)return Number.isNaN(v.getTime())?null:v;
-if(typeof v==="number"){
-const d=new Date(v<1e11?v*1000:v);
-return Number.isNaN(d.getTime())?null:d;
+
+function validNumber(v) {
+  if (v === null || v === undefined || v === "") {
+    return null;
+  }
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
 }
-if(typeof v!=="string")return null;
-let m=v.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})(?::(\d{2}))?/);
-if(m)return new Date(Date.UTC(+m[3],+m[2]-1,+m[1],+m[4]-7,+m[5],+(m[6]||0)));
-m=v.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/);
-if(m){
-if(/[Zz]$|[+-]\d{2}:?\d{2}$/.test(v))return new Date(v);
-return new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4]-7,+m[5],+(m[6]||0)));
+
+/* ========================================
+   PARSING LOG FIREBASE
+======================================== */
+
+function parseLogs(raw) {
+  const rows = [];
+
+  function visit(obj, depth = 0) {
+    if (!obj || typeof obj !== "object" || depth > 5) {
+      return;
+    }
+
+    if (
+      obj.Waktu !== undefined ||
+      obj.Timestamp !== undefined
+    ) {
+      const time = parseDate(
+        obj.Waktu ?? obj.Timestamp
+      );
+
+      if (time) {
+        rows.push({
+          time,
+          suhu:validNumber(obj.Suhu),
+          hum:validNumber(obj.Kelembaban),
+          status:String(obj.Status ?? "-")
+        });
+      }
+      return;
+    }
+
+    for (const value of Object.values(obj)) {
+      visit(value, depth + 1);
+    }
+  }
+
+  visit(raw);
+  return rows.sort((a,b) => a.time - b.time);
 }
-const d=new Date(v);
-return Number.isNaN(d.getTime())?null:d;
+
+function todayRows(rows) {
+  const today = dayKey();
+  return rows.filter(
+    row => dayKey(row.time) === today
+  );
 }
-function parseLogs(raw){
-const rows=[];
-function visit(obj,depth=0){
-if(!obj||typeof obj!=="object"||depth>5)return;
-if(obj.Waktu!==undefined||obj.Timestamp!==undefined){
-const time=parseDate(obj.Waktu??obj.Timestamp);
-if(time)rows.push({
-time,suhu:validNumber(obj.Suhu),
-hum:validNumber(obj.Kelembaban),
-status:String(obj.Status??"-")
+
+/* ========================================
+   DETEKSI PERANGKAT OFFLINE
+======================================== */
+
+function isFresh() {
+  if (!connected || !monitoringLoaded || !monitoring) {
+    return false;
+  }
+
+  // Prioritas: timestamp dari server Firebase.
+  const lastSeen = validNumber(monitoring.LastSeen);
+
+  if (lastSeen !== null) {
+    const timestamp = lastSeen < 1e11
+      ? lastSeen * 1000
+      : lastSeen;
+
+    const age = Date.now() + serverOffset - timestamp;
+
+    return age >= -10000 && age <= 30000;
+  }
+
+  // Kompatibilitas dengan firmware lama.
+  // Memerlukan Waktu yang diperbarui berkala.
+  const waktu = parseDate(monitoring.Waktu);
+
+  if (!waktu) return false;
+
+  const age = Date.now() + serverOffset - waktu.getTime();
+
+  return age >= -10000 && age <= 30000;
+}
+
+function isSensorOK() {
+  return (
+    monitoring?.SensorOk !== false &&
+    validNumber(monitoring?.Suhu) !== null &&
+    validNumber(monitoring?.Kelembaban) !== null
+  );
+}
+
+function banner(text, bg = "var(--petal)",
+                fg = "var(--espresso)") {
+  const el = $("statusBanner");
+  el.textContent = text;
+  el.style.background = bg;
+  el.style.color = fg;
+}
+
+function updateLive() {
+  $("syncContainer").style.display = "none";
+
+  if (!monitoringLoaded) {
+    $("valSuhu").textContent = "--";
+    $("valHum").textContent = "--";
+    banner("MENGHUBUNGKAN KE SISTEM...");
+    return;
+  }
+
+  if (!isFresh()) {
+    $("valSuhu").textContent = "--";
+    $("valHum").textContent = "--";
+    banner(
+      "PERANGKAT OFFLINE",
+      "var(--espresso)",
+      "white"
+    );
+    return;
+  }
+
+  if (!isSensorOK()) {
+    $("valSuhu").textContent = "--";
+    $("valHum").textContent = "--";
+    banner("SENSOR ERROR","#8E24AA","white");
+    return;
+  }
+
+  $("valSuhu").textContent =
+    Number(monitoring.Suhu).toFixed(1);
+
+  $("valHum").textContent =
+    Number(monitoring.Kelembaban).toFixed(1);
+
+  $("syncContainer").style.display = "block";
+  $("syncTime").textContent =
+    monitoring.Waktu || "--";
+
+  const status = String(
+    monitoring.Status || "MEMBACA SENSOR..."
+  );
+
+  if (status === "NORMAL") {
+    banner(status,"var(--green)","white");
+  } else if (status.includes("TIDAK NORMAL")) {
+    banner(status,"var(--red)","white");
+  } else {
+    banner(status,"var(--orange)","white");
+  }
+}
+
+/* ========================================
+   MODE GRAFIK
+======================================== */
+
+function graphMode() {
+  if (monitoring?.LogTest5Active === true) {
+    return "test";
+  }
+
+  // Firmware lama mungkin belum mengirim
+  // LogTest5Active. Jangan samakan TestMode
+  // dengan pencatatan lima menit.
+  return "normal";
+}
+
+function activeRows() {
+  return graphMode() === "test"
+    ? testLogs
+    : normalLogs;
+}
+
+function timeX(date) {
+  const p = wibParts(date);
+
+  return Number(p.hour)*60 +
+         Number(p.minute) +
+         Number(p.second)/60;
+}
+
+/* ========================================
+   GRAFIK CHART.JS 24 JAM
+======================================== */
+
+function makeChart(id, title, color) {
+  return new Chart($(id), {
+    type:"line",
+
+    data:{
+      datasets:[{
+        label:title,
+        data:[],
+        borderColor:color,
+        backgroundColor:color,
+        pointRadius:4,
+        pointHoverRadius:6,
+        borderWidth:2.5,
+        tension:0,
+        fill:false,
+        spanGaps:false
+      }]
+    },
+
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      parsing:false,
+      animation:false,
+
+      interaction:{
+        mode:"nearest",
+        intersect:false
+      },
+
+      plugins:{
+        legend:{
+          display:true,
+          position:"top",
+          labels:{
+            font:{
+              family:"Montserrat",
+              size:11,
+              weight:"600"
+            }
+          }
+        },
+
+        tooltip:{
+          callbacks:{
+            title(items) {
+              const x = items[0]?.parsed.x ?? 0;
+              const h = String(
+                Math.floor(x/60)
+              ).padStart(2,"0");
+
+              const m = String(
+                Math.floor(x%60)
+              ).padStart(2,"0");
+
+              return `${h}:${m} WIB`;
+            }
+          }
+        }
+      },
+
+      scales:{
+        x:{
+          type:"linear",
+          min:0,
+          max:1440,
+
+          grid:{
+            color:"rgba(62,39,35,.06)"
+          },
+
+          title:{
+            display:true,
+            text:"Waktu (WIB)",
+            font:{
+              family:"Montserrat",
+              size:11,
+              weight:"600"
+            }
+          },
+
+          ticks:{
+            stepSize:60,
+            autoSkip:false,
+            maxRotation:0,
+            minRotation:0,
+            padding:12,
+            color:"#795548",
+
+            font:{
+              family:"Montserrat",
+              size:10,
+              weight:"600"
+            },
+
+            callback:function(value) {
+              const width = this.chart.width;
+
+              // Tetap skala per jam.
+              // Hanya sebagian label yang ditampilkan.
+              const interval =
+                width < 450 ? 6 :
+                width < 850 ? 4 : 3;
+
+              const hour = Math.round(value/60);
+
+              if (hour % interval !== 0) {
+                return "";
+              }
+
+              return String(hour)
+                .padStart(2,"0") + ":00";
+            }
+          }
+        },
+
+        y:{
+          title:{
+            display:true,
+            text:title
+          },
+
+          ticks:{
+            precision:1,
+            color:"#795548"
+          },
+
+          grid:{
+            color:"rgba(62,39,35,.08)"
+          }
+        }
+      }
+    }
+  });
+}
+
+function initCharts() {
+  if (tempChart) return;
+
+  tempChart = makeChart(
+    "tempChart",
+    "Suhu (°C)",
+    "#3E2723"
+  );
+
+  humChart = makeChart(
+    "humChart",
+    "Kelembaban (%RH)",
+    "#D88DA8"
+  );
+}
+
+function renderCharts() {
+  if (!tempChart) return;
+
+  const mode = graphMode();
+  const rows = todayRows(activeRows());
+
+  $("modeLabel").textContent =
+    mode === "test"
+    ? "Mode: Pengujian 5 Menit"
+    : "Mode: Normal";
+
+  tempChart.data.datasets[0].data =
+    rows
+      .filter(r => r.suhu !== null)
+      .map(r => ({
+        x:timeX(r.time),
+        y:r.suhu
+      }));
+
+  humChart.data.datasets[0].data =
+    rows
+      .filter(r => r.hum !== null)
+      .map(r => ({
+        x:timeX(r.time),
+        y:r.hum
+      }));
+
+  tempChart.update("none");
+  humChart.update("none");
+
+  $("chartMessage").textContent =
+    rows.length
+      ? `Menampilkan ${rows.length} catatan asli hari ini.`
+      : "Belum ada data pengukuran tersimpan untuk hari ini pada mode ini.";
+}
+
+/* ========================================
+   TABEL LOG HARI INI
+======================================== */
+
+function addCell(row, text) {
+  const td = document.createElement("td");
+  td.textContent = String(text);
+  row.appendChild(td);
+  return td;
+}
+
+function renderTable() {
+  const tbody = $("logTableBody");
+  tbody.replaceChildren();
+
+  const mode = graphMode();
+  const rows = todayRows(activeRows());
+
+  $("tableMode").textContent =
+    mode === "test"
+      ? "Pengujian: Pencatatan 5 Menit"
+      : "Normal: 07.00, 14.00, 21.00 WIB";
+
+  function insert(label, item) {
+    const tr = document.createElement("tr");
+
+    addCell(tr,label);
+
+    addCell(
+      tr,
+      item?.suhu == null
+        ? "Belum tercatat"
+        : item.suhu.toFixed(1)
+    );
+
+    addCell(
+      tr,
+      item?.hum == null
+        ? "Belum tercatat"
+        : item.hum.toFixed(1)
+    );
+
+    const td = addCell(
+      tr,
+      item?.status || "Menunggu"
+    );
+
+    td.className = "status-tag";
+    tbody.appendChild(tr);
+  }
+
+  if (mode === "normal") {
+    for (const hour of [7,14,21]) {
+      const matching = rows.filter(r =>
+        Number(wibParts(r.time).hour) === hour
+      );
+
+      const item = matching.length
+        ? matching[matching.length-1]
+        : null;
+
+      insert(
+        String(hour).padStart(2,"0") + ":00 WIB",
+        item
+      );
+    }
+  } else if (rows.length) {
+    for (const item of rows.slice().reverse()) {
+      const p = wibParts(item.time);
+
+      insert(
+        `${p.hour}:${p.minute}:${p.second} WIB`,
+        item
+      );
+    }
+  } else {
+    const tr = document.createElement("tr");
+    const td = addCell(
+      tr,
+      "Belum ada log pengujian hari ini"
+    );
+    td.colSpan = 4;
+    tbody.appendChild(tr);
+  }
+}
+
+function renderAll() {
+  renderCharts();
+  renderTable();
+}
+
+/* ========================================
+   FIREBASE LISTENERS
+======================================== */
+
+function detach() {
+  for (const ref of [
+    monitoringRef,normalRef,testRef
+  ]) {
+    if (ref) ref.off();
+  }
+
+  monitoringRef = null;
+  normalRef = null;
+  testRef = null;
+}
+
+function attachListeners() {
+  detach();
+
+  const token = ++listenerGeneration;
+
+  monitoring = null;
+  normalLogs = [];
+  testLogs = [];
+
+  monitoringLoaded = false;
+  normalLoaded = false;
+  testLoaded = false;
+
+  updateLive();
+  renderAll();
+
+  monitoringRef = db.ref(
+    currentNode + "/Monitoring"
+  );
+
+  normalRef = db.ref(
+    currentNode + "/LogData"
+  );
+
+  testRef = db.ref(
+    currentNode + "/LogDataPengujian"
+  );
+
+  monitoringRef.on("value", snapshot => {
+    if (token !== listenerGeneration) return;
+
+    monitoring = snapshot.val();
+    monitoringLoaded = true;
+
+    updateLive();
+    renderAll();
+  }, error => {
+    console.error("Monitoring:",error);
+    monitoringLoaded = true;
+    updateLive();
+  });
+
+  normalRef.on("value", snapshot => {
+    if (token !== listenerGeneration) return;
+
+    normalLogs = parseLogs(snapshot.val());
+    normalLoaded = true;
+    renderAll();
+  }, error => {
+    console.error("Log normal:",error);
+  });
+
+  testRef.on("value", snapshot => {
+    if (token !== listenerGeneration) return;
+
+    testLogs = parseLogs(snapshot.val());
+    testLoaded = true;
+    renderAll();
+  }, error => {
+    console.error("Log pengujian:",error);
+  });
+}
+
+$("nodeSelect").addEventListener("change",() => {
+  currentNode = $("nodeSelect").value;
+  attachListeners();
 });
-return;
-}
-for(const value of Object.values(obj))visit(value,depth+1);
-}
-visit(raw);
-return rows.sort((a,b)=>a.time-b.time);
-}
-function todayRows(rows){
-const today=dayKey();
-return rows.filter(r=>dayKey(r.time)===today);
-}
-function isFresh(){
-if(!connected||!monitoringLoaded||!monitoring)return false;
-const stamp=validNumber(monitoring.LastSeen);
-if(stamp===null)return false;
-const ms=stamp<1e11?stamp*1000:stamp;
-const age=Date.now()+serverOffset-ms;
-return age>=-10000&&age<=30000;
-}
-function isSensorOK(){
-return monitoring?.SensorOk!==false&&
-validNumber(monitoring?.Suhu)!==null&&
-validNumber(monitoring?.Kelembaban)!==null;
-}
-function banner(text,color="var(--petal)",fg="var(--espresso)"){
-$("statusBanner").textContent=text;
-$("statusBanner").style.background=color;
-$("statusBanner").style.color=fg;
-}
-function updateLive(){
-const fresh=isFresh();
-$("syncContainer").style.display="none";
-if(!monitoringLoaded){
-$("valSuhu").textContent="--";
-$("valHum").textContent="--";
-banner("MENGHUBUNGKAN KE SISTEM...");
-return;
-}
-if(!fresh){
-$("valSuhu").textContent="--";
-$("valHum").textContent="--";
-banner("PERANGKAT OFFLINE","var(--espresso)","white");
-return;
-}
-if(!isSensorOK()){
-$("valSuhu").textContent="--";
-$("valHum").textContent="--";
-banner("SENSOR ERROR","#8E24AA","white");
-return;
-}
-$("valSuhu").textContent=Number(monitoring.Suhu).toFixed(1);
-$("valHum").textContent=Number(monitoring.Kelembaban).toFixed(1);
-$("syncContainer").style.display="block";
-$("syncTime").textContent=monitoring.Waktu||"--";
-const status=String(monitoring.Status||"MEMBACA SENSOR...");
-if(status==="NORMAL")banner(status,"var(--green)","white");
-else if(status.includes("TIDAK NORMAL"))banner(status,"var(--red)","white");
-else banner(status,"var(--orange)","white");
-}
-function graphMode(){
-return monitoring?.LogTest5Active===true?"test":"normal";
-}
-function activeRows(){
-return graphMode()==="test"?testLogs:normalLogs;
-}
-function timeX(date){
-const p=wibParts(date);
-return Number(p.hour)*60+Number(p.minute)+Number(p.second)/60;
-}
-function makeChart(id,title,color){
-return new Chart($(id),{
-type:"line",
-data:{datasets:[{
-label:title,data:[],borderColor:color,
-backgroundColor:color,pointRadius:3,
-pointHoverRadius:6,borderWidth:2.5,
-tension:0,fill:false,spanGaps:false
-}]},
-options:{
-responsive:true,maintainAspectRatio:false,
-parsing:false,animation:false,
-interaction:{mode:"nearest",intersect:false},
-plugins:{
-legend:{display:true,position:"top"},
-tooltip:{callbacks:{title(items){
-const x=items[0]?.parsed.x??0;
-const h=String(Math.floor(x/60)).padStart(2,"0");
-const m=String(Math.floor(x%60)).padStart(2,"0");
-return h+":"+m+" WIB";
-}}}
-},
-scales:{
-x:{
-type:"linear",min:0,max:1440,
-ticks:{
-stepSize:60,autoSkip:false,maxRotation:0,
-callback:v=>String(Math.floor(v/60)).padStart(2,"0")+":00"
-},
-title:{display:true,text:"Waktu (WIB)"},
-grid:{color:"rgba(62,39,35,.06)"}
-},
-y:{
-title:{display:true,text:title},
-ticks:{precision:1},
-grid:{color:"rgba(62,39,35,.08)"}
-}
-}
-}
-});
-}
-function initCharts(){
-if(tempChart)return;
-tempChart=makeChart("tempChart","Suhu (°C)","#3E2723");
-humChart=makeChart("humChart","Kelembaban (%RH)","#D88DA8");
-}
-function renderCharts(){
-if(!tempChart)return;
-const mode=graphMode();
-$("modeLabel").textContent=mode==="test"?
-"Mode: Pengujian 5 Menit":"Mode: Normal";
-const rows=todayRows(activeRows());
-tempChart.data.datasets[0].data=rows.filter(r=>r.suhu!==null).map(r=>({x:timeX(r.time),y:r.suhu}));
-humChart.data.datasets[0].data=rows.filter(r=>r.hum!==null).map(r=>({x:timeX(r.time),y:r.hum}));
-tempChart.update("none");humChart.update("none");
-$("chartMessage").textContent=rows.length?
-`Menampilkan ${rows.length} catatan asli hari ini dari ${mode==="test"?"LogDataPengujian":"LogData"}.`:
-"Belum ada data pengukuran tersimpan untuk hari ini pada mode ini.";
-}
-function addCell(row,text){
-const td=document.createElement("td");
-td.textContent=String(text);row.appendChild(td);
-return td;
-}
-function renderTable(){
-const tbody=$("logTableBody");
-tbody.replaceChildren();
-const mode=graphMode();
-$("tableMode").textContent=mode==="test"?
-"Pengujian: pencatatan 5 menit":"Normal: 07.00, 14.00, 21.00 WIB";
-const rows=todayRows(activeRows());
-function insert(label,item){
-const tr=document.createElement("tr");
-addCell(tr,label);
-addCell(tr,item?.suhu===null||!item?"Belum tercatat":item.suhu.toFixed(1));
-addCell(tr,item?.hum===null||!item?"Belum tercatat":item.hum.toFixed(1));
-const td=addCell(tr,item?.status||"Menunggu");
-td.className="status-tag";
-tbody.appendChild(tr);
-}
-if(mode==="normal"){
-for(const h of [7,14,21]){
-const matching=rows.filter(r=>Number(wibParts(r.time).hour)===h);
-const item=matching.length?matching[matching.length-1]:null;
-insert(String(h).padStart(2,"0")+":00 WIB",item);
-}
-}else if(rows.length){
-for(const item of rows.slice().reverse()){
-const p=wibParts(item.time);
-insert(`${p.hour}:${p.minute}:${p.second} WIB`,item);
-}
-}else{
-const tr=document.createElement("tr");
-addCell(tr,"Belum ada log pengujian hari ini");
-tbody.appendChild(tr);
-}
-}
-function renderAll(){
-renderCharts();renderTable();
-}
-function detach(){
-for(const ref of [monitoringRef,normalRef,testRef])if(ref)ref.off();
-monitoringRef=normalRef=testRef=null;
-}
-function attachListeners(){
-detach();
-const token=++listenerGeneration;
-monitoring=null;normalLogs=[];testLogs=[];
-monitoringLoaded=false;normalLoaded=false;testLoaded=false;
-updateLive();renderAll();
-monitoringRef=db.ref(currentNode+"/Monitoring");
-normalRef=db.ref(currentNode+"/LogData");
-testRef=db.ref(currentNode+"/LogDataPengujian");
-monitoringRef.on("value",snap=>{
-if(token!==listenerGeneration)return;
-monitoring=snap.val();
-monitoringLoaded=true;
-updateLive();renderAll();
-},err=>{console.error(err);monitoringLoaded=true;updateLive();});
-normalRef.on("value",snap=>{
-if(token!==listenerGeneration)return;
-normalLogs=parseLogs(snap.val());normalLoaded=true;renderAll();
-},console.error);
-testRef.on("value",snap=>{
-if(token!==listenerGeneration)return;
-testLogs=parseLogs(snap.val());testLoaded=true;renderAll();
-},console.error);
-}
-$("nodeSelect").addEventListener("change",()=>{
-currentNode=$("nodeSelect").value;
-attachListeners();
-});
-db.ref(".info/serverTimeOffset").on("value",s=>{
-serverOffset=Number(s.val())||0;updateLive();
-});
-db.ref(".info/connected").on("value",s=>{
-connected=s.val()===true;updateLive();
-});
-currentDay=dayKey();
-setInterval(()=>{
-updateLive();
-if(dayKey()!==currentDay){currentDay=dayKey();renderAll();}
+
+db.ref(".info/serverTimeOffset").on(
+  "value",
+  snapshot => {
+    serverOffset = Number(snapshot.val()) || 0;
+    updateLive();
+  }
+);
+
+db.ref(".info/connected").on(
+  "value",
+  snapshot => {
+    connected = snapshot.val() === true;
+    updateLive();
+  }
+);
+
+currentDay = dayKey();
+
+setInterval(() => {
+  if (!auth.currentUser) return;
+
+  updateLive();
+
+  if (dayKey() !== currentDay) {
+    currentDay = dayKey();
+    renderAll();
+  }
 },5000);
 
-$("togglePassword").onclick=()=>{
-const p=$("loginPassword");
-p.type=p.type==="password"?"text":"password";
-$("togglePassword").textContent=p.type==="password"?"👁":"🙈";
+/* ========================================
+   LOGIN DAN LOGOUT
+======================================== */
+
+$("togglePassword").onclick = () => {
+  const p = $("loginPassword");
+
+  p.type = p.type === "password"
+    ? "text"
+    : "password";
+
+  $("togglePassword").textContent =
+    p.type === "password" ? "👁" : "🙈";
 };
-$("humanCheck").onchange=()=>{
-$("loginButton").disabled=!$("humanCheck").checked;
+
+$("humanCheck").onchange = () => {
+  $("loginButton").disabled =
+    !$("humanCheck").checked;
 };
-$("loginForm").onsubmit=async e=>{
-e.preventDefault();
-$("loginError").textContent="";
-if($("loginUsername").value.trim().toLowerCase()!==LOGIN_USERNAME){
-$("loginError").textContent="Username atau password salah.";
-return;
-}
-$("loginButton").disabled=true;
-try{
-await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
-await auth.signInWithEmailAndPassword(
-FIREBASE_LOGIN_EMAIL,$("loginPassword").value
-);
-}catch(err){
-console.error(err);
-$("loginError").textContent="Login gagal. Periksa username, password, dan konfigurasi Firebase Authentication.";
-}finally{
-$("loginButton").disabled=!$("humanCheck").checked;
-}
+
+$("loginForm").onsubmit = async event => {
+  event.preventDefault();
+
+  $("loginError").textContent = "";
+
+  const username = $("loginUsername")
+    .value.trim().toLowerCase();
+
+  if (username !== LOGIN_USERNAME) {
+    $("loginError").textContent =
+      "Username atau password salah.";
+    return;
+  }
+
+  $("loginButton").disabled = true;
+
+  try {
+    await auth.setPersistence(
+      firebase.auth.Auth.Persistence.SESSION
+    );
+
+    await auth.signInWithEmailAndPassword(
+      FIREBASE_LOGIN_EMAIL,
+      $("loginPassword").value
+    );
+  } catch(error) {
+    console.error("Login:",error);
+
+    $("loginError").textContent =
+      "Login gagal. Periksa akun Firebase Authentication.";
+  } finally {
+    $("loginButton").disabled =
+      !$("humanCheck").checked;
+  }
 };
-$("logoutButton").onclick=()=>auth.signOut();
-auth.onAuthStateChanged(user=>{
-if(user){
-$("loginScreen").style.display="none";
-$("dashboardApp").style.display="block";
-initCharts();attachListeners();
-}else{
-++listenerGeneration;detach();
-$("dashboardApp").style.display="none";
-$("loginScreen").style.display="flex";
-monitoring=null;monitoringLoaded=false;
-$("loginPassword").value="";
-$("humanCheck").checked=false;
-$("loginButton").disabled=true;
-}
+
+$("logoutButton").onclick = () => {
+  auth.signOut();
+};
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    $("loginScreen").style.display = "none";
+    $("dashboardApp").style.display = "block";
+
+    initCharts();
+    attachListeners();
+  } else {
+    ++listenerGeneration;
+    detach();
+
+    $("dashboardApp").style.display = "none";
+    $("loginScreen").style.display = "flex";
+
+    monitoring = null;
+    monitoringLoaded = false;
+
+    $("loginPassword").value = "";
+    $("humanCheck").checked = false;
+    $("loginButton").disabled = true;
+  }
 });
 
-// Membuat grafik Excel asli melalui struktur OOXML.
-function escapeXML(v){
-return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;")
-.replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+/* ========================================
+   EXCEL: XML HELPERS
+======================================== */
+
+function escapeXML(v) {
+  return String(v)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
 }
-function nativeChartXML(title,column,lastRow,index){
-const sheet="'Monitoring Ruang Operasi'";
-const cat=`${sheet}!$B$6:$B$${lastRow}`;
-const val=`${sheet}!$${column}$6:$${column}$${lastRow}`;
-const ax=100+index*2,ay=ax+1;
-const color=index===1?"3E2723":"D88DA8";
-return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+function nativeChartXML(title,column,lastRow,index) {
+  const sheet = "'Monitoring Ruang Operasi'";
+  const cat = `${sheet}!$B$6:$B$${lastRow}`;
+  const val = `${sheet}!$${column}$6:$${column}$${lastRow}`;
+
+  const ax = 100 + index*2;
+  const ay = ax+1;
+  const color = index === 1 ? "3E2723" : "D88DA8";
+
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart"
 xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
-<c:chart><c:title><c:tx><c:rich><a:bodyPr/><a:lstStyle/>
-<a:p><a:r><a:rPr lang="id-ID"/><a:t>${escapeXML(title)}</a:t></a:r></a:p>
+<c:chart>
+<c:title><c:tx><c:rich><a:bodyPr/><a:lstStyle/>
+<a:p><a:r><a:rPr lang="id-ID"/>
+<a:t>${escapeXML(title)}</a:t></a:r></a:p>
 </c:rich></c:tx></c:title>
-<c:plotArea><c:layout/><c:lineChart>
-<c:grouping val="standard"/><c:varyColors val="0"/>
-<c:ser><c:idx val="0"/><c:order val="0"/>
+<c:plotArea><c:layout/>
+<c:lineChart>
+<c:grouping val="standard"/>
+<c:varyColors val="0"/>
+<c:ser>
+<c:idx val="0"/><c:order val="0"/>
 <c:tx><c:v>${escapeXML(title)}</c:v></c:tx>
-<c:spPr><a:ln w="28575"><a:solidFill><a:srgbClr val="${color}"/></a:solidFill></a:ln></c:spPr>
+<c:spPr>
+<a:ln w="28575">
+<a:solidFill><a:srgbClr val="${color}"/></a:solidFill>
+</a:ln>
+</c:spPr>
 <c:marker><c:symbol val="circle"/><c:size val="5"/></c:marker>
-<c:cat><c:strRef><c:f>${escapeXML(cat)}</c:f></c:strRef></c:cat>
-<c:val><c:numRef><c:f>${escapeXML(val)}</c:f></c:numRef></c:val>
-<c:smooth val="0"/></c:ser>
-<c:axId val="${ax}"/><c:axId val="${ay}"/>
+<c:cat>
+<c:strRef><c:f>${escapeXML(cat)}</c:f></c:strRef>
+</c:cat>
+<c:val>
+<c:numRef><c:f>${escapeXML(val)}</c:f></c:numRef>
+</c:val>
+<c:smooth val="0"/>
+</c:ser>
+<c:axId val="${ax}"/>
+<c:axId val="${ay}"/>
 </c:lineChart>
-<c:catAx><c:axId val="${ax}"/><c:scaling><c:orientation val="minMax"/></c:scaling>
-<c:axPos val="b"/><c:tickLblPos val="nextTo"/>
-<c:crossAx val="${ay}"/><c:crosses val="autoZero"/></c:catAx>
-<c:valAx><c:axId val="${ay}"/><c:scaling><c:orientation val="minMax"/></c:scaling>
-<c:axPos val="l"/><c:numFmt formatCode="0.0" sourceLinked="0"/>
-<c:tickLblPos val="nextTo"/><c:crossAx val="${ax}"/>
-<c:crosses val="autoZero"/></c:valAx>
-</c:plotArea><c:plotVisOnly val="1"/><c:dispBlanksAs val="gap"/>
-</c:chart></c:chartSpace>`;
+<c:catAx>
+<c:axId val="${ax}"/>
+<c:scaling><c:orientation val="minMax"/></c:scaling>
+<c:axPos val="b"/>
+<c:tickLblPos val="nextTo"/>
+<c:crossAx val="${ay}"/>
+<c:crosses val="autoZero"/>
+</c:catAx>
+<c:valAx>
+<c:axId val="${ay}"/>
+<c:scaling><c:orientation val="minMax"/></c:scaling>
+<c:axPos val="l"/>
+<c:numFmt formatCode="0.0" sourceLinked="0"/>
+<c:tickLblPos val="nextTo"/>
+<c:crossAx val="${ax}"/>
+<c:crosses val="autoZero"/>
+</c:valAx>
+</c:plotArea>
+<c:plotVisOnly val="1"/>
+<c:dispBlanksAs val="gap"/>
+</c:chart>
+</c:chartSpace>`;
 }
-async function insertNativeCharts(buffer,lastRow){
-const zip=await JSZip.loadAsync(buffer);
-const wsPath="xl/worksheets/sheet1.xml";
-let ws=await zip.file(wsPath).async("string");
-if(!ws.includes("xmlns:r=")){
-ws=ws.replace("<worksheet ","<worksheet xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" ");
-}
-ws=ws.replace("</worksheet>",'<drawing r:id="rIdChartDrawing"/></worksheet>');
-zip.file(wsPath,ws);
-const relPath="xl/worksheets/_rels/sheet1.xml.rels";
-let rel=zip.file(relPath)?
-await zip.file(relPath).async("string"):
-'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
-rel=rel.replace("</Relationships>",
-'<Relationship Id="rIdChartDrawing" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/></Relationships>');
-zip.file(relPath,rel);
-function anchor(id,start){
-return `<xdr:twoCellAnchor>
-<xdr:from><xdr:col>7</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${start}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>
-<xdr:to><xdr:col>18</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${start+14}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>
-<xdr:graphicFrame macro=""><xdr:nvGraphicFramePr>
+
+/* ========================================
+   MEMASUKKAN GRAFIK ASLI KE XLSX
+======================================== */
+
+async function insertNativeCharts(buffer,lastRow) {
+  const zip = await JSZip.loadAsync(buffer);
+
+  const wsPath = "xl/worksheets/sheet1.xml";
+  let ws = await zip.file(wsPath).async("string");
+
+  if (!ws.includes("xmlns:r=")) {
+    ws = ws.replace(
+      "<worksheet ",
+      '<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" '
+    );
+  }
+
+  ws = ws.replace(
+    "</worksheet>",
+    '<drawing r:id="rIdChartDrawing"/></worksheet>'
+  );
+
+  zip.file(wsPath,ws);
+
+  const relPath =
+    "xl/worksheets/_rels/sheet1.xml.rels";
+
+  let rel = zip.file(relPath)
+    ? await zip.file(relPath).async("string")
+    : '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
+
+  rel = rel.replace(
+    "</Relationships>",
+    '<Relationship Id="rIdChartDrawing" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/></Relationships>'
+  );
+
+  zip.file(relPath,rel);
+
+  function anchor(id,start) {
+    return `<xdr:twoCellAnchor>
+<xdr:from>
+<xdr:col>7</xdr:col><xdr:colOff>0</xdr:colOff>
+<xdr:row>${start}</xdr:row><xdr:rowOff>0</xdr:rowOff>
+</xdr:from>
+<xdr:to>
+<xdr:col>18</xdr:col><xdr:colOff>0</xdr:colOff>
+<xdr:row>${start+14}</xdr:row><xdr:rowOff>0</xdr:rowOff>
+</xdr:to>
+<xdr:graphicFrame macro="">
+<xdr:nvGraphicFramePr>
 <xdr:cNvPr id="${id}" name="Grafik ${id}"/>
-<xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr>
-<xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm>
-<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart">
+<xdr:cNvGraphicFramePr/>
+</xdr:nvGraphicFramePr>
+<xdr:xfrm>
+<a:off x="0" y="0"/>
+<a:ext cx="0" cy="0"/>
+</xdr:xfrm>
+<a:graphic>
+<a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart">
 <c:chart xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart"
-xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:id="rId${id}"/>
-</a:graphicData></a:graphic></xdr:graphicFrame>
-<xdr:clientData/></xdr:twoCellAnchor>`;
+xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+r:id="rId${id}"/>
+</a:graphicData>
+</a:graphic>
+</xdr:graphicFrame>
+<xdr:clientData/>
+</xdr:twoCellAnchor>`;
+  }
+
+  zip.file(
+    "xl/drawings/drawing1.xml",
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">' +
+    anchor(1,1) +
+    anchor(2,17) +
+    "</xdr:wsDr>"
+  );
+
+  zip.file(
+    "xl/drawings/_rels/drawing1.xml.rels",
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart1.xml"/>' +
+    '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart2.xml"/>' +
+    "</Relationships>"
+  );
+
+  zip.file(
+    "xl/charts/chart1.xml",
+    nativeChartXML(
+      "Grafik Suhu (°C)","C",lastRow,1
+    )
+  );
+
+  zip.file(
+    "xl/charts/chart2.xml",
+    nativeChartXML(
+      "Grafik Kelembaban (%RH)","D",lastRow,2
+    )
+  );
+
+  let types = await zip.file(
+    "[Content_Types].xml"
+  ).async("string");
+
+  types = types.replace(
+    "</Types>",
+    '<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>' +
+    '<Override PartName="/xl/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>' +
+    '<Override PartName="/xl/charts/chart2.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>' +
+    "</Types>"
+  );
+
+  zip.file("[Content_Types].xml",types);
+
+  return zip.generateAsync({
+    type:"blob",
+    compression:"DEFLATE"
+  });
 }
-zip.file("xl/drawings/drawing1.xml",
-'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
-'<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">'+
-anchor(1,1)+anchor(2,17)+"</xdr:wsDr>");
-zip.file("xl/drawings/_rels/drawing1.xml.rels",
-'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
-'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
-'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart1.xml"/>'+
-'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart2.xml"/>'+
-"</Relationships>");
-zip.file("xl/charts/chart1.xml",nativeChartXML("Grafik Suhu (°C)","C",lastRow,1));
-zip.file("xl/charts/chart2.xml",nativeChartXML("Grafik Kelembaban (%RH)","D",lastRow,2));
-let types=await zip.file("[Content_Types].xml").async("string");
-types=types.replace("</Types>",
-'<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>'+
-'<Override PartName="/xl/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>'+
-'<Override PartName="/xl/charts/chart2.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/></Types>');
-zip.file("[Content_Types].xml",types);
-return zip.generateAsync({type:"blob",compression:"DEFLATE"});
+
+/* ========================================
+   DOWNLOAD EXCEL SATU SHEET
+======================================== */
+
+async function exportExcel() {
+  const button = $("exportButton");
+  const message = $("exportMessage");
+
+  const month = $("exportMonth").value;
+  const mode = $("exportMode").value;
+
+  if (!/^\d{4}-\d{2}$/.test(month)) {
+    alert("Pilih bulan dan tahun terlebih dahulu.");
+    return;
+  }
+
+  button.disabled = true;
+  message.textContent =
+    "Mengambil data asli dari Firebase...";
+
+  try {
+    const path = currentNode + "/" +
+      (mode === "test"
+        ? "LogDataPengujian"
+        : "LogData");
+
+    const snapshot = await db.ref(path).once("value");
+
+    const rows = parseLogs(snapshot.val())
+      .filter(r =>
+        dayKey(r.time).startsWith(month)
+      );
+
+    if (!rows.length) {
+      message.textContent =
+        "Tidak ada data tersimpan untuk bulan dan jenis log ini.";
+      return;
+    }
+
+    if (
+      typeof ExcelJS === "undefined" ||
+      typeof JSZip === "undefined"
+    ) {
+      throw new Error(
+        "Pustaka Excel gagal dimuat. Periksa koneksi internet."
+      );
+    }
+
+    const book = new ExcelJS.Workbook();
+
+    book.creator = "Monitoring Ruang Operasi";
+    book.calcProperties.fullCalcOnLoad = true;
+
+    const sheet = book.addWorksheet(
+      "Monitoring Ruang Operasi"
+    );
+
+    sheet.columns = [
+      {width:7},
+      {width:23},
+      {width:16},
+      {width:23},
+      {width:40},
+      {width:18},
+      {width:3}
+    ];
+
+    sheet.mergeCells("A1:F1");
+    sheet.getCell("A1").value =
+      "MONITORING RUANG OPERASI";
+
+    sheet.getCell("A1").font = {
+      bold:true,
+      size:16,
+      color:{argb:"FF3E2723"}
+    };
+
+    sheet.mergeCells("A2:F2");
+
+    sheet.getCell("A2").value =
+      `${currentNode} | ` +
+      `${mode === "test" ? "Pengujian" : "Normal"} | ${month}`;
+
+    sheet.mergeCells("A3:F3");
+
+    sheet.getCell("A3").value =
+      "Data pengukuran asli dari Firebase";
+
+    const header = sheet.getRow(5);
+
+    header.values = [
+      "No",
+      "Waktu (WIB)",
+      "Suhu (°C)",
+      "Kelembaban (%RH)",
+      "Status Ruangan",
+      "Jenis Log"
+    ];
+
+    header.font = {
+      bold:true,
+      color:{argb:"FF3E2723"}
+    };
+
+    header.fill = {
+      type:"pattern",
+      pattern:"solid",
+      fgColor:{argb:"FFF4C9D6"}
+    };
+
+    rows.forEach((r,i) => {
+      sheet.addRow([
+        i+1,
+        formatWib(r.time),
+        r.suhu,
+        r.hum,
+        r.status,
+        mode === "test"
+          ? "Pengujian"
+          : "Normal"
+      ]);
+    });
+
+    sheet.autoFilter = {
+      from:"A5",
+      to:"F5"
+    };
+
+    sheet.views = [{
+      state:"frozen",
+      ySplit:5
+    }];
+
+    for (let i=6; i<=rows.length+5; i++) {
+      sheet.getCell("C"+i).numFmt = "0.0";
+      sheet.getCell("D"+i).numFmt = "0.0";
+    }
+
+    message.textContent =
+      "Membuat workbook dan grafik Excel...";
+
+    const bytes = await book.xlsx.writeBuffer();
+
+    const blob = await insertNativeCharts(
+      bytes,
+      rows.length+5
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+
+    a.download =
+      `Monitoring_${currentNode}_${mode}_${month}.xlsx`;
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    },10000);
+
+    message.textContent =
+      `File dibuat dari ${rows.length} catatan asli. ` +
+      "Periksa kedua grafik di Microsoft Excel.";
+
+  } catch(error) {
+    console.error("Export Excel:",error);
+
+    message.textContent =
+      "Gagal membuat Excel: " + error.message;
+  } finally {
+    button.disabled = false;
+  }
 }
-async function exportExcel(){
-const button=$("exportButton");
-const message=$("exportMessage");
-const month=$("exportMonth").value;
-const mode=$("exportMode").value;
-if(!/^\d{4}-\d{2}$/.test(month)){
-alert("Pilih bulan dan tahun terlebih dahulu.");return;
-}
-button.disabled=true;
-message.textContent="Mengambil data asli dari Firebase...";
-try{
-const path=currentNode+"/"+(mode==="test"?"LogDataPengujian":"LogData");
-const snap=await db.ref(path).once("value");
-const rows=parseLogs(snap.val()).filter(r=>dayKey(r.time).startsWith(month));
-if(!rows.length){
-message.textContent="Tidak ada data tersimpan untuk bulan dan jenis log ini.";
-return;
-}
-if(typeof ExcelJS==="undefined"||typeof JSZip==="undefined")
-throw new Error("Pustaka Excel gagal dimuat. Periksa internet.");
-const book=new ExcelJS.Workbook();
-book.creator="Monitoring Ruang Operasi";
-book.calcProperties.fullCalcOnLoad=true;
-const sheet=book.addWorksheet("Monitoring Ruang Operasi");
-sheet.columns=[
-{width:7},{width:23},{width:16},{width:23},
-{width:40},{width:18},{width:3}
-];
-sheet.mergeCells("A1:F1");
-sheet.getCell("A1").value="MONITORING RUANG OPERASI";
-sheet.getCell("A1").font={bold:true,size:16,color:{argb:"FF3E2723"}};
-sheet.mergeCells("A2:F2");
-sheet.getCell("A2").value=`${currentNode} | ${mode==="test"?"Pengujian":"Normal"} | ${month}`;
-sheet.mergeCells("A3:F3");
-sheet.getCell("A3").value="Data asli Firebase - Grafik terhubung dengan sel Excel";
-const header=sheet.getRow(5);
-header.values=["No","Waktu (WIB)","Suhu (°C)","Kelembaban (%RH)","Status Ruangan","Jenis Log"];
-header.font={bold:true,color:{argb:"FF3E2723"}};
-header.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFF4C9D6"}};
-rows.forEach((r,i)=>{
-sheet.addRow([
-i+1,formatWib(r.time),r.suhu,r.hum,r.status,
-mode==="test"?"Pengujian":"Normal"
-]);
-});
-sheet.autoFilter={from:"A5",to:"F5"};
-sheet.views=[{state:"frozen",ySplit:5}];
-for(let i=6;i<=rows.length+5;i++){
-sheet.getCell("C"+i).numFmt="0.0";
-sheet.getCell("D"+i).numFmt="0.0";
-}
-message.textContent="Membuat workbook dan grafik Excel...";
-const bytes=await book.xlsx.writeBuffer();
-const blob=await insertNativeCharts(bytes,rows.length+5);
-const url=URL.createObjectURL(blob);
-const a=document.createElement("a");
-a.href=url;
-a.download=`Monitoring_${currentNode}_${mode}_${month}.xlsx`;
-document.body.appendChild(a);a.click();a.remove();
-setTimeout(()=>URL.revokeObjectURL(url),10000);
-message.textContent=`File dibuat dari ${rows.length} catatan asli. Periksa grafik di Microsoft Excel.`;
-}catch(err){
-console.error(err);
-message.textContent="Gagal membuat Excel: "+err.message;
-}finally{button.disabled=false;}
-}
-$("exportButton").addEventListener("click",exportExcel);
-$("exportMonth").value=dayKey().slice(0,7);
+
+$("exportButton").addEventListener(
+  "click",
+  exportExcel
+);
+
+$("exportMonth").value =
+  dayKey().slice(0,7);
 
 </script>
 </body>
