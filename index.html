@@ -1,2422 +1,715 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Monitoring Ruang Operasi</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-<!-- FIREBASE -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-<!-- GRAFIK -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- EXCEL -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
-
-/* =========================
-   WARNA WEBSITE
-========================= */
-
-:root {
-    --rose: #EAB0C8;
-    --plum: #6E1E3B;
-    --lime: #C9D863;
-    --ivory: #F7F6D7;
-    --white: #FFFFFF;
-    --background: #FFF9FB;
-    --green: #2E7D32;
-    --red: #C62828;
-    --orange: #EF6C00;
-    --shadow: 0 10px 28px rgba(110,30,59,0.10);
+:root{
+--espresso:#3E2723;--petal:#F4C9D6;
+--ivory:#F5F0E6;--bg:#FAF6F0;
+--white:#fff;--green:#2E7D32;
+--red:#D32F2F;--orange:#F57C00;
+--shadow:0 12px 28px rgba(62,39,35,.08)
 }
-
-* {
-    box-sizing: border-box;
-    font-family: "Montserrat", sans-serif;
-}
-
-body {
-    margin: 0;
-    padding: 22px;
-    background: var(--background);
-    color: var(--plum);
-}
-
-button,
-input,
-select {
-    font-family: inherit;
-}
-
-button {
-    cursor: pointer;
-}
-
-.container {
-    max-width: 1150px;
-    margin: auto;
-}
-
-/* =========================
-   LOGIN
-========================= */
-
-#loginScreen {
-    min-height: calc(100vh - 44px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.login-card {
-    width: 100%;
-    max-width: 430px;
-    padding: 32px;
-    background: white;
-    border: 3px solid var(--rose);
-    border-radius: 26px;
-    box-shadow: var(--shadow);
-}
-
-.login-card h1 {
-    text-align: center;
-    font-size: 23px;
-    font-weight: 900;
-}
-
-.login-subtitle {
-    text-align: center;
-    font-size: 12px;
-    line-height: 1.7;
-    margin-bottom: 24px;
-}
-
-.form-group {
-    margin-bottom: 16px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 12px;
-    font-weight: 800;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 13px;
-    border: 2px solid var(--rose);
-    border-radius: 12px;
-    outline: none;
-}
-
-.password-wrap {
-    position: relative;
-}
-
-.password-wrap input {
-    padding-right: 55px;
-}
-
-.toggle-password {
-    position: absolute;
-    right: 6px;
-    top: 5px;
-    padding: 9px;
-    border: none;
-    background: transparent;
-    font-size: 18px;
-}
-
-.human-check {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 20px 0;
-    padding: 13px;
-    background: var(--ivory);
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 700;
-}
-
-.btn-primary {
-    border: none;
-    background: var(--plum);
-    color: white;
-    padding: 13px 20px;
-    border-radius: 13px;
-    font-size: 12px;
-    font-weight: 800;
-}
-
-.btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.btn-full {
-    width: 100%;
-}
-
-.login-error {
-    min-height: 20px;
-    color: var(--red);
-    text-align: center;
-    margin-top: 12px;
-    font-size: 12px;
-}
-
-/* =========================
-   DASHBOARD
-========================= */
-
-#dashboardApp {
-    display: none;
-}
-
-.app-header {
-    background: var(--plum);
-    color: white;
-    padding: 28px;
-    border-radius: 25px;
-    margin-bottom: 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-}
-
-.app-header h1 {
-    color: var(--rose);
-    margin: 0 0 8px;
-    font-size: 22px;
-}
-
-.app-header p {
-    margin: 0;
-    font-size: 11px;
-    line-height: 1.7;
-}
-
-.header-controls {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.hardware-selector {
-    background: var(--rose);
-    color: var(--plum);
-    padding: 10px;
-    border-radius: 13px;
-}
-
-.hardware-selector select {
-    background: transparent;
-    border: none;
-    color: var(--plum);
-    font-weight: 800;
-}
-
-.btn-logout {
-    background: white;
-    color: var(--plum);
-    border: none;
-    border-radius: 12px;
-    padding: 11px 16px;
-    font-weight: 800;
-}
-
-.status-banner {
-    padding: 20px;
-    text-align: center;
-    background: var(--rose);
-    border-radius: 20px;
-    margin-bottom: 24px;
-    font-weight: 900;
-    font-size: 17px;
-}
-
-.metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0,1fr));
-    gap: 20px;
-    margin-bottom: 24px;
-}
-
-.metric-card {
-    background: var(--ivory);
-    border: 3px solid white;
-    border-radius: 23px;
-    padding: 26px;
-    box-shadow: var(--shadow);
-}
-
-.metric-header {
-    font-size: 13px;
-    font-weight: 900;
-    margin-bottom: 15px;
-}
-
-.metric-value {
-    font-size: 48px;
-    font-weight: 900;
-    margin-bottom: 15px;
-}
-
-.metric-unit {
-    font-size: 20px;
-}
-
-.metric-range {
-    display: inline-block;
-    padding: 8px 12px;
-    background: white;
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.panel {
-    background: white;
-    padding: 26px;
-    border: 3px solid var(--ivory);
-    border-radius: 24px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow);
-}
-
-.panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
-    border-bottom: 2px dashed var(--rose);
-}
-
-.panel-header h2 {
-    margin: 0;
-    font-size: 16px;
-}
-
-/* =========================
-   FILTER
-========================= */
-
-.filter-grid {
-    display: flex;
-    gap: 14px;
-    align-items: end;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-    padding: 18px;
-    border-radius: 16px;
-    background: var(--ivory);
-}
-
-.filter-item {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-
-.filter-item label {
-    font-size: 11px;
-    font-weight: 800;
-}
-
-.filter-item select,
-.filter-item input {
-    padding: 10px;
-    border: 2px solid var(--rose);
-    border-radius: 10px;
-    background: white;
-    color: var(--plum);
-    font-size: 12px;
-    min-height: 40px;
-}
-
-.chart-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0,1fr));
-    gap: 20px;
-}
-
-.chart-box {
-    padding: 16px;
-    border: 2px solid var(--ivory);
-    border-radius: 18px;
-    min-width: 0;
-}
-
-.chart-box h3 {
-    text-align: center;
-    font-size: 13px;
-    margin-top: 0;
-}
-
-.chart-note {
-    font-size: 11px;
-    text-align: center;
-    margin-top: 12px;
-    opacity: 0.8;
-}
-
-.table-responsive {
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-}
-
-th {
-    background: var(--ivory);
-    text-align: left;
-    padding: 13px;
-}
-
-td {
-    padding: 13px;
-    border-bottom: 1px solid #eee;
-}
-
-.status-tag {
-    padding: 6px 9px;
-    border-radius: 9px;
-    color: white;
-    font-size: 10px;
-    font-weight: 800;
-}
-
-.sync-time {
-    text-align: center;
-    font-size: 11px;
-    margin: 20px 0;
-    font-weight: 700;
-}
-
-.info-message {
-    font-size: 12px;
-    padding: 12px;
-    background: var(--ivory);
-    border-radius: 10px;
-    margin-top: 15px;
-    line-height: 1.6;
-}
-
-@media (max-width: 800px) {
-    .chart-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 600px) {
-    body {
-        padding: 12px;
-    }
-
-    .metrics-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .metric-value {
-        font-size: 42px;
-    }
-
-    .app-header,
-    .panel {
-        padding: 20px;
-    }
-}
-
+*{box-sizing:border-box;font-family:Montserrat,sans-serif}
+body{margin:0;padding:24px;background:var(--bg);color:var(--espresso)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+#loginScreen{min-height:calc(100vh - 48px);display:flex;justify-content:center;align-items:center}
+.login-card{width:100%;max-width:430px;background:white;border:3px solid var(--ivory);border-radius:28px;padding:32px;box-shadow:var(--shadow)}
+.login-icon{text-align:center;font-size:40px}
+.login-card h1{text-align:center;font-size:24px;font-weight:900;margin:8px 0}
+.login-subtitle{text-align:center;font-size:12px;line-height:1.7;opacity:.7;margin-bottom:26px}
+.form-group{margin-bottom:17px}
+.form-group label{display:block;font-size:12px;font-weight:800;margin-bottom:7px}
+.form-group input{width:100%;padding:14px;border:2px solid var(--ivory);border-radius:14px;outline:none}
+.form-group input:focus{border-color:var(--petal)}
+.password-wrap{position:relative}
+.password-wrap input{padding-right:55px}
+.toggle-password{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;padding:10px}
+.human-check{display:flex;gap:11px;align-items:center;background:var(--ivory);padding:14px;border-radius:14px;margin:18px 0;font-size:13px;font-weight:800}
+.human-check input{width:20px;height:20px;accent-color:var(--espresso)}
+.btn-login,.btn-export{border:0;background:var(--espresso);color:var(--petal);border-radius:15px;padding:14px 20px;font-size:12px;font-weight:900}
+.btn-login{width:100%}
+button:disabled{opacity:.45;cursor:not-allowed}
+.login-error{min-height:20px;color:var(--red);font-size:12px;text-align:center;margin-top:12px}
+.login-note{text-align:center;font-size:10px;opacity:.6;margin-top:15px}
+#dashboardApp{display:none}
+.container{max-width:1150px;margin:auto}
+.app-header{background:var(--espresso);color:var(--ivory);padding:30px;border-radius:28px;box-shadow:var(--shadow);margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.app-title h1{color:var(--petal);font-size:22px;font-weight:900;margin:0 0 8px}
+.app-title p{font-size:12px;font-weight:600;margin:0;line-height:1.6}
+.header-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hardware-selector{background:var(--petal);color:var(--espresso);border-radius:20px;padding:10px 16px;font-size:12px;font-weight:800}
+.hardware-selector select{border:0;background:transparent;color:var(--espresso);font-weight:800;max-width:190px}
+.btn-logout{background:white;color:var(--espresso);border:0;border-radius:15px;padding:12px 18px;font-size:11px;font-weight:900}
+.status-banner{padding:20px;border-radius:22px;background:var(--petal);font-size:18px;font-weight:900;text-align:center;margin-bottom:24px;box-shadow:var(--shadow)}
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-bottom:24px}
+.metric-card{background:var(--ivory);padding:28px;border-radius:26px;border:3px solid white;box-shadow:var(--shadow)}
+.metric-header{font-size:14px;font-weight:900;margin-bottom:15px}
+.metric-value{font-size:52px;font-weight:900;margin-bottom:14px}
+.metric-unit{font-size:22px;color:#795548}
+.metric-range{display:inline-block;background:white;border-radius:12px;padding:7px 13px;font-size:11px;font-weight:700}
+.panel{background:white;border:3px solid var(--ivory);border-radius:28px;padding:28px;margin-bottom:24px;box-shadow:var(--shadow)}
+.panel-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:2px dashed var(--petal);padding-bottom:14px;margin-bottom:20px}
+.panel-header h2{font-size:16px;font-weight:900;margin:0}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.chart-box{background:white;border:2px solid var(--ivory);border-radius:22px;padding:18px;min-width:0}
+.chart-box h3{text-align:center;font-size:14px;font-weight:900;margin:0 0 14px}
+.chart-area{height:270px;position:relative}
+.chart-note{font-size:11px;opacity:.7;text-align:center;margin-top:10px;line-height:1.6}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.control{display:flex;flex-direction:column;gap:7px}
+.control label{font-size:11px;font-weight:800}
+.control select,.control input{border:2px solid var(--ivory);border-radius:12px;padding:11px;background:white;color:var(--espresso);font-size:12px;max-width:100%}
+.table-responsive{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--ivory);padding:14px;text-align:left}
+td{padding:14px;border-bottom:1px solid var(--ivory);font-weight:600}
+.status-tag{display:inline-block;padding:6px 10px;border-radius:10px;background:var(--petal);font-size:10px;font-weight:800}
+.sync-time{text-align:center;font-size:11px;font-weight:700;opacity:.75;margin:10px 0 25px}
+.message{font-size:11px;line-height:1.6;opacity:.75;margin-top:12px}
+.mode-label{background:var(--ivory);border-radius:12px;padding:9px 13px;font-size:11px;font-weight:800}
+@media(max-width:850px){.chart-grid{grid-template-columns:1fr}}
+@media(max-width:600px){body{padding:14px}.app-header,.panel{padding:20px}.metric-value{font-size:42px}}
 </style>
 </head>
-
 <body>
 
-<!-- =========================
-     HALAMAN LOGIN
-========================= -->
-
 <section id="loginScreen">
-
-    <div class="login-card">
-
-        <h1>🔐 Login Monitoring</h1>
-
-        <p class="login-subtitle">
-            Masuk untuk melihat dashboard monitoring
-            suhu dan kelembaban ruang operasi.
-        </p>
-
-        <form id="loginForm">
-
-            <div class="form-group">
-                <label>Username</label>
-
-                <input
-                    type="text"
-                    id="loginUsername"
-                    placeholder="Masukkan username"
-                    required
-                >
-            </div>
-
-            <div class="form-group">
-                <label>Password</label>
-
-                <div class="password-wrap">
-
-                    <input
-                        type="password"
-                        id="loginPassword"
-                        placeholder="Masukkan password"
-                        required
-                    >
-
-                    <button
-                        type="button"
-                        class="toggle-password"
-                        id="togglePassword"
-                    >
-                        👁
-                    </button>
-
-                </div>
-            </div>
-
-            <label class="human-check">
-
-                <input
-                    type="checkbox"
-                    id="humanCheck"
-                >
-
-                Saya bukan robot
-
-            </label>
-
-            <button
-                type="submit"
-                class="btn-primary btn-full"
-                id="loginButton"
-                disabled
-            >
-                MASUK KE DASHBOARD
-            </button>
-
-            <div
-                class="login-error"
-                id="loginError"
-            ></div>
-
-        </form>
-
-    </div>
-
+<div class="login-card">
+<div class="login-icon">🔐</div>
+<h1>Login Monitoring</h1>
+<p class="login-subtitle">Masuk untuk melihat dashboard monitoring suhu dan kelembaban ruang operasi.</p>
+<form id="loginForm">
+<div class="form-group">
+<label for="loginUsername">Username</label>
+<input id="loginUsername" autocomplete="username" placeholder="Masukkan username" required>
+</div>
+<div class="form-group">
+<label for="loginPassword">Password</label>
+<div class="password-wrap">
+<input id="loginPassword" type="password" autocomplete="current-password" placeholder="Masukkan password" required>
+<button type="button" class="toggle-password" id="togglePassword">👁</button>
+</div>
+</div>
+<label class="human-check">
+<input type="checkbox" id="humanCheck">
+Saya bukan robot
+</label>
+<button class="btn-login" id="loginButton" disabled>MASUK KE DASHBOARD</button>
+<div id="loginError" class="login-error"></div>
+</form>
+<div class="login-note">Login diamankan menggunakan Firebase Authentication.</div>
+</div>
 </section>
 
-
-<!-- =========================
-     DASHBOARD
-========================= -->
-
-<div id="dashboardApp" class="container">
-
-    <div class="app-header">
-
-        <div>
-            <h1>🧸 MONITORING RUANG OPERASI</h1>
-
-            <p>
-                Standar Permenkes No. 2 Tahun 2023
-                <br>
-                Suhu: 19–24°C |
-                Kelembaban: 40–60%RH
-            </p>
-        </div>
-
-        <div class="header-controls">
-
-            <div class="hardware-selector">
-
-                <label>⚡ DEVICE:</label>
-
-                <select id="nodeSelect">
-
-                    <option value="Hardware_1">
-                        Ruang Operasi 1
-                    </option>
-
-                    <option value="Hardware_2">
-                        Ruang Operasi 2
-                    </option>
-
-                    <option value="Hardware_3">
-                        Ruang Operasi 3
-                    </option>
-
-                    <option value="Hardware_4">
-                        Ruang Operasi 4
-                    </option>
-
-                    <option value="Hardware_5">
-                        Ruang Operasi 5
-                    </option>
-
-                </select>
-
-            </div>
-
-            <button
-                class="btn-logout"
-                id="logoutButton"
-            >
-                KELUAR
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <!-- STATUS REALTIME -->
-
-    <div
-        class="status-banner"
-        id="statusBanner"
-    >
-        Menghubungkan ke Firebase...
-    </div>
-
-
-    <!-- NILAI REALTIME -->
-
-    <div class="metrics-grid">
-
-        <div class="metric-card">
-
-            <div class="metric-header">
-                🌡️ SUHU RUANGAN
-            </div>
-
-            <div class="metric-value">
-
-                <span id="valSuhu">--</span>
-
-                <span class="metric-unit">°C</span>
-
-            </div>
-
-            <div class="metric-range">
-                Batas Normal: 19.0°C – 24.0°C
-            </div>
-
-        </div>
-
-
-        <div class="metric-card">
-
-            <div class="metric-header">
-                💧 KELEMBABAN UDARA
-            </div>
-
-            <div class="metric-value">
-
-                <span id="valHum">--</span>
-
-                <span class="metric-unit">%RH</span>
-
-            </div>
-
-            <div class="metric-range">
-                Batas Normal: 40%RH – 60%RH
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- =========================
-         GRAFIK
-    ========================= -->
-
-    <div class="panel">
-
-        <div class="panel-header">
-
-            <h2>📈 Grafik Riwayat Pemantauan</h2>
-
-        </div>
-
-
-        <div class="filter-grid">
-
-            <div class="filter-item">
-
-                <label>Jenis Data Grafik</label>
-
-                <select id="chartMode">
-
-                    <option value="pengujian">
-                        Pengujian (5 Menit)
-                    </option>
-
-                    <option value="normal">
-                        Normal (07.00, 14.00, 21.00)
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div class="filter-item">
-
-                <label>Rentang Tanggal</label>
-
-                <select id="chartRange">
-
-                    <option value="all">
-                        Semua Tanggal
-                    </option>
-
-                    <option value="date">
-                        Satu Tanggal
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div class="filter-item" id="dateFilterWrap">
-
-                <label>Pilih Tanggal</label>
-
-                <input
-                    type="date"
-                    id="chartDate"
-                >
-
-            </div>
-
-        </div>
-
-
-        <div class="chart-grid">
-
-            <div class="chart-box">
-
-                <h3>🌡️ Grafik Suhu</h3>
-
-                <canvas id="tempChart"></canvas>
-
-            </div>
-
-
-            <div class="chart-box">
-
-                <h3>💧 Grafik Kelembaban</h3>
-
-                <canvas id="humChart"></canvas>
-
-            </div>
-
-        </div>
-
-
-        <div
-            class="chart-note"
-            id="chartInfo"
-        >
-            Memuat riwayat data...
-        </div>
-
-    </div>
-
-
-    <!-- =========================
-         LOG DAN EXCEL
-    ========================= -->
-
-    <div class="panel">
-
-        <div class="panel-header">
-
-            <h2>📋 Log Data dan Download Excel</h2>
-
-        </div>
-
-
-        <div class="filter-grid">
-
-            <div class="filter-item">
-
-                <label>Jenis Data Excel</label>
-
-                <select id="exportMode">
-
-                    <option value="pengujian">
-                        LogDataPengujian
-                    </option>
-
-                    <option value="normal">
-                        LogDataNormal
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div class="filter-item">
-
-                <label>Bulan dan Tahun</label>
-
-                <input
-                    type="month"
-                    id="exportMonth"
-                >
-
-            </div>
-
-
-            <button
-                class="btn-primary"
-                id="downloadExcelButton"
-            >
-                📥 Download Excel (.xlsx)
-            </button>
-
-        </div>
-
-
-        <div class="info-message">
-
-            File Excel akan berisi seluruh data
-            dalam bulan yang dipilih.
-
-            <br><br>
-
-            Sheet 1: Data Pengukuran<br>
-            Sheet 2: Grafik Suhu<br>
-            Sheet 3: Grafik Kelembaban
-
-        </div>
-
-
-        <br>
-
-        <div class="table-responsive">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-                        <th>Waktu Pencatatan</th>
-                        <th>Suhu (°C)</th>
-                        <th>Kelembaban (%RH)</th>
-                        <th>Status Ruangan</th>
-                    </tr>
-
-                </thead>
-
-                <tbody id="logTableBody">
-
-                    <tr>
-                        <td colspan="4">
-                            Memuat data...
-                        </td>
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
-
-    <div class="sync-time">
-
-        ✨ Waktu Data Terakhir:
-
-        <span id="syncTime">--</span>
-
-    </div>
-
+<main id="dashboardApp" class="container">
+<header class="app-header">
+<div class="app-title">
+<h1>🧸 MONITORING RUANG OPERASI</h1>
+<p>Standar Permenkes No. 2 Tahun 2023<br>Suhu: 19–24°C | Kelembaban: 40–60%RH</p>
 </div>
+<div class="header-controls">
+<div class="hardware-selector">
+<label for="nodeSelect">⚡ DEVICE:</label>
+<select id="nodeSelect">
+<option value="Hardware_1">Ruang Operasi 1 (Utama)</option>
+<option value="Hardware_2">Ruang Operasi 2</option>
+<option value="Hardware_3">Ruang Operasi 3</option>
+<option value="Hardware_4">Ruang Operasi 4</option>
+<option value="Hardware_5">Ruang Operasi 5</option>
+</select>
+</div>
+<button class="btn-logout" id="logoutButton">KELUAR</button>
+</div>
+</header>
 
+<div class="status-banner" id="statusBanner">MENGHUBUNGKAN KE FIREBASE...</div>
+
+<section class="metrics-grid">
+<div class="metric-card">
+<div class="metric-header">🌡️ SUHU RUANGAN</div>
+<div class="metric-value"><span id="valSuhu">--</span><span class="metric-unit"> °C</span></div>
+<div class="metric-range">Batas Normal: 19.0°C – 24.0°C</div>
+</div>
+<div class="metric-card">
+<div class="metric-header">💧 KELEMBABAN UDARA</div>
+<div class="metric-value"><span id="valHum">--</span><span class="metric-unit"> %RH</span></div>
+<div class="metric-range">Batas Normal: 40%RH – 60%RH</div>
+</div>
+</section>
+
+<section class="panel">
+<div class="panel-header">
+<h2>📈 Grafik Pemantauan 24 Jam</h2>
+<span class="mode-label" id="modeLabel">Mode: Menunggu data</span>
+</div>
+<div class="chart-grid">
+<div class="chart-box">
+<h3>🌡️ Grafik Suhu</h3>
+<div class="chart-area"><canvas id="tempChart"></canvas></div>
+<div class="chart-note">Hari ini, 00.00–24.00 WIB. Titik sesuai waktu pengukuran asli.</div>
+</div>
+<div class="chart-box">
+<h3>💧 Grafik Kelembaban</h3>
+<div class="chart-area"><canvas id="humChart"></canvas></div>
+<div class="chart-note">Penanda waktu setiap jam. Tidak membuat data pengukuran palsu.</div>
+</div>
+</div>
+<p class="message" id="chartMessage"></p>
+</section>
+
+<section class="panel">
+<div class="panel-header">
+<h2>📋 Log Data Hari Ini</h2>
+<span class="mode-label" id="tableMode">Normal: 07.00, 14.00, 21.00 WIB</span>
+</div>
+<div class="table-responsive">
+<table>
+<thead>
+<tr><th>Waktu Pencatatan</th><th>Suhu (°C)</th><th>Kelembaban (%RH)</th><th>Status Ruangan</th></tr>
+</thead>
+<tbody id="logTableBody">
+<tr><td colspan="4">Memuat data...</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="panel">
+<div class="panel-header">
+<h2>📥 Log Data dan Download Excel</h2>
+</div>
+<div class="controls">
+<div class="control">
+<label for="exportMode">Jenis Log Data</label>
+<select id="exportMode">
+<option value="normal">LogDataNormal (3 Waktu)</option>
+<option value="test">LogDataPengujian (5 Menit)</option>
+</select>
+</div>
+<div class="control">
+<label for="exportMonth">Bulan dan Tahun</label>
+<input id="exportMonth" type="month">
+</div>
+<button class="btn-export" id="exportButton">📥 DOWNLOAD EXCEL (.xlsx)</button>
+</div>
+<p class="message" id="exportMessage">File Excel berisi satu worksheet, tabel data asli, dan dua grafik Excel yang terhubung ke sel.</p>
+</section>
+
+<div class="sync-time" id="syncContainer">
+✨ Waktu Data Terakhir: <span id="syncTime">--</span>
+</div>
+</main>
 
 <script>
+"use strict";
 
-/* =========================
-   KONFIGURASI FIREBASE
-========================= */
-
-const firebaseConfig = {
-
-    apiKey:
-        "AIzaSyC44n4OsHy_iuoVbWYkK0VbDLcZCVAtysA",
-
-    authDomain:
-        "diagnostik-monitoring.firebaseapp.com",
-
-    databaseURL:
-        "https://diagnostik-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
-
-    projectId:
-        "diagnostik-monitoring",
-
-    storageBucket:
-        "diagnostik-monitoring.firebasestorage.app",
-
-    messagingSenderId:
-        "823689373846",
-
-    appId:
-        "1:823689373846:web:23f175ea86d2a5ea823ab7"
-
+const firebaseConfig={
+apiKey:"AIzaSyC44n4OsHy_iuoVbWYkK0VbDLcZCVAtysA",
+authDomain:"diagnostik-monitoring.firebaseapp.com",
+databaseURL:"https://diagnostik-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId:"diagnostik-monitoring",
+storageBucket:"diagnostik-monitoring.firebasestorage.app",
+messagingSenderId:"823689373846",
+appId:"1:823689373846:web:23f175ea86d2a5ea823ab7",
+measurementId:"G-0MCE5RWW9Q"
 };
 
 firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.database();
 
-const auth = firebase.auth();
-const db = firebase.database();
+const LOGIN_USERNAME="marnar";
+// Pertahankan alamat autentikasi dari kode website lama.
+// Jika login gagal, verifikasi email ini pada Firebase Authentication.
+const FIREBASE_LOGIN_EMAIL="marnar@diagnostik-monitoring.example.com";
 
+const $=id=>document.getElementById(id);
+let currentNode="Hardware_1";
+let monitoring=null,normalLogs=[],testLogs=[];
+let monitoringLoaded=false,normalLoaded=false,testLoaded=false;
+let monitoringRef=null,normalRef=null,testRef=null;
+let tempChart=null,humChart=null;
+let serverOffset=0,connected=false,listenerGeneration=0;
+let currentDay="";
 
-/* =========================
-   LOGIN
-========================= */
+function validNumber(v){
+if(v===null||v===undefined||v==="")return null;
+const n=Number(v);return Number.isFinite(n)?n:null;
+}
 
-const LOGIN_USERNAME = "marnar";
+function wibParts(date=new Date()){
+const p=new Intl.DateTimeFormat("en-GB",{
+timeZone:"Asia/Jakarta",year:"numeric",month:"2-digit",
+day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",
+hourCycle:"h23"
+}).formatToParts(date);
+const o={};
+for(const x of p)if(x.type!=="literal")o[x.type]=x.value;
+return o;
+}
+function dayKey(date=new Date()){
+const p=wibParts(date);
+return `${p.year}-${p.month}-${p.day}`;
+}
+function formatWib(date){
+const p=wibParts(date);
+return `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}:${p.second}`;
+}
+function parseDate(v){
+if(v instanceof Date)return Number.isNaN(v.getTime())?null:v;
+if(typeof v==="number"){
+const d=new Date(v<1e11?v*1000:v);
+return Number.isNaN(d.getTime())?null:d;
+}
+if(typeof v!=="string")return null;
+let m=v.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})(?::(\d{2}))?/);
+if(m)return new Date(Date.UTC(+m[3],+m[2]-1,+m[1],+m[4]-7,+m[5],+(m[6]||0)));
+m=v.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/);
+if(m){
+if(/[Zz]$|[+-]\d{2}:?\d{2}$/.test(v))return new Date(v);
+return new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4]-7,+m[5],+(m[6]||0)));
+}
+const d=new Date(v);
+return Number.isNaN(d.getTime())?null:d;
+}
+function parseLogs(raw){
+const rows=[];
+function visit(obj,depth=0){
+if(!obj||typeof obj!=="object"||depth>5)return;
+if(obj.Waktu!==undefined||obj.Timestamp!==undefined){
+const time=parseDate(obj.Waktu??obj.Timestamp);
+if(time)rows.push({
+time,suhu:validNumber(obj.Suhu),
+hum:validNumber(obj.Kelembaban),
+status:String(obj.Status??"-")
+});
+return;
+}
+for(const value of Object.values(obj))visit(value,depth+1);
+}
+visit(raw);
+return rows.sort((a,b)=>a.time-b.time);
+}
+function todayRows(rows){
+const today=dayKey();
+return rows.filter(r=>dayKey(r.time)===today);
+}
+function isFresh(){
+if(!connected||!monitoringLoaded||!monitoring)return false;
+const stamp=validNumber(monitoring.LastSeen);
+if(stamp===null)return false;
+const ms=stamp<1e11?stamp*1000:stamp;
+const age=Date.now()+serverOffset-ms;
+return age>=-10000&&age<=30000;
+}
+function isSensorOK(){
+return monitoring?.SensorOk!==false&&
+validNumber(monitoring?.Suhu)!==null&&
+validNumber(monitoring?.Kelembaban)!==null;
+}
+function banner(text,color="var(--petal)",fg="var(--espresso)"){
+$("statusBanner").textContent=text;
+$("statusBanner").style.background=color;
+$("statusBanner").style.color=fg;
+}
+function updateLive(){
+const fresh=isFresh();
+$("syncContainer").style.display="none";
+if(!monitoringLoaded){
+$("valSuhu").textContent="--";
+$("valHum").textContent="--";
+banner("MENGHUBUNGKAN KE SISTEM...");
+return;
+}
+if(!fresh){
+$("valSuhu").textContent="--";
+$("valHum").textContent="--";
+banner("PERANGKAT OFFLINE","var(--espresso)","white");
+return;
+}
+if(!isSensorOK()){
+$("valSuhu").textContent="--";
+$("valHum").textContent="--";
+banner("SENSOR ERROR","#8E24AA","white");
+return;
+}
+$("valSuhu").textContent=Number(monitoring.Suhu).toFixed(1);
+$("valHum").textContent=Number(monitoring.Kelembaban).toFixed(1);
+$("syncContainer").style.display="block";
+$("syncTime").textContent=monitoring.Waktu||"--";
+const status=String(monitoring.Status||"MEMBACA SENSOR...");
+if(status==="NORMAL")banner(status,"var(--green)","white");
+else if(status.includes("TIDAK NORMAL"))banner(status,"var(--red)","white");
+else banner(status,"var(--orange)","white");
+}
+function graphMode(){
+return monitoring?.LogTest5Active===true?"test":"normal";
+}
+function activeRows(){
+return graphMode()==="test"?testLogs:normalLogs;
+}
+function timeX(date){
+const p=wibParts(date);
+return Number(p.hour)*60+Number(p.minute)+Number(p.second)/60;
+}
+function makeChart(id,title,color){
+return new Chart($(id),{
+type:"line",
+data:{datasets:[{
+label:title,data:[],borderColor:color,
+backgroundColor:color,pointRadius:3,
+pointHoverRadius:6,borderWidth:2.5,
+tension:0,fill:false,spanGaps:false
+}]},
+options:{
+responsive:true,maintainAspectRatio:false,
+parsing:false,animation:false,
+interaction:{mode:"nearest",intersect:false},
+plugins:{
+legend:{display:true,position:"top"},
+tooltip:{callbacks:{title(items){
+const x=items[0]?.parsed.x??0;
+const h=String(Math.floor(x/60)).padStart(2,"0");
+const m=String(Math.floor(x%60)).padStart(2,"0");
+return h+":"+m+" WIB";
+}}}
+},
+scales:{
+x:{
+type:"linear",min:0,max:1440,
+ticks:{
+stepSize:60,autoSkip:false,maxRotation:0,
+callback:v=>String(Math.floor(v/60)).padStart(2,"0")+":00"
+},
+title:{display:true,text:"Waktu (WIB)"},
+grid:{color:"rgba(62,39,35,.06)"}
+},
+y:{
+title:{display:true,text:title},
+ticks:{precision:1},
+grid:{color:"rgba(62,39,35,.08)"}
+}
+}
+}
+});
+}
+function initCharts(){
+if(tempChart)return;
+tempChart=makeChart("tempChart","Suhu (°C)","#3E2723");
+humChart=makeChart("humChart","Kelembaban (%RH)","#D88DA8");
+}
+function renderCharts(){
+if(!tempChart)return;
+const mode=graphMode();
+$("modeLabel").textContent=mode==="test"?
+"Mode: Pengujian 5 Menit":"Mode: Normal";
+const rows=todayRows(activeRows());
+tempChart.data.datasets[0].data=rows.filter(r=>r.suhu!==null).map(r=>({x:timeX(r.time),y:r.suhu}));
+humChart.data.datasets[0].data=rows.filter(r=>r.hum!==null).map(r=>({x:timeX(r.time),y:r.hum}));
+tempChart.update("none");humChart.update("none");
+$("chartMessage").textContent=rows.length?
+`Menampilkan ${rows.length} catatan asli hari ini dari ${mode==="test"?"LogDataPengujian":"LogData"}.`:
+"Belum ada data pengukuran tersimpan untuk hari ini pada mode ini.";
+}
+function addCell(row,text){
+const td=document.createElement("td");
+td.textContent=String(text);row.appendChild(td);
+return td;
+}
+function renderTable(){
+const tbody=$("logTableBody");
+tbody.replaceChildren();
+const mode=graphMode();
+$("tableMode").textContent=mode==="test"?
+"Pengujian: pencatatan 5 menit":"Normal: 07.00, 14.00, 21.00 WIB";
+const rows=todayRows(activeRows());
+function insert(label,item){
+const tr=document.createElement("tr");
+addCell(tr,label);
+addCell(tr,item?.suhu===null||!item?"Belum tercatat":item.suhu.toFixed(1));
+addCell(tr,item?.hum===null||!item?"Belum tercatat":item.hum.toFixed(1));
+const td=addCell(tr,item?.status||"Menunggu");
+td.className="status-tag";
+tbody.appendChild(tr);
+}
+if(mode==="normal"){
+for(const h of [7,14,21]){
+const matching=rows.filter(r=>Number(wibParts(r.time).hour)===h);
+const item=matching.length?matching[matching.length-1]:null;
+insert(String(h).padStart(2,"0")+":00 WIB",item);
+}
+}else if(rows.length){
+for(const item of rows.slice().reverse()){
+const p=wibParts(item.time);
+insert(`${p.hour}:${p.minute}:${p.second} WIB`,item);
+}
+}else{
+const tr=document.createElement("tr");
+addCell(tr,"Belum ada log pengujian hari ini");
+tbody.appendChild(tr);
+}
+}
+function renderAll(){
+renderCharts();renderTable();
+}
+function detach(){
+for(const ref of [monitoringRef,normalRef,testRef])if(ref)ref.off();
+monitoringRef=normalRef=testRef=null;
+}
+function attachListeners(){
+detach();
+const token=++listenerGeneration;
+monitoring=null;normalLogs=[];testLogs=[];
+monitoringLoaded=false;normalLoaded=false;testLoaded=false;
+updateLive();renderAll();
+monitoringRef=db.ref(currentNode+"/Monitoring");
+normalRef=db.ref(currentNode+"/LogData");
+testRef=db.ref(currentNode+"/LogDataPengujian");
+monitoringRef.on("value",snap=>{
+if(token!==listenerGeneration)return;
+monitoring=snap.val();
+monitoringLoaded=true;
+updateLive();renderAll();
+},err=>{console.error(err);monitoringLoaded=true;updateLive();});
+normalRef.on("value",snap=>{
+if(token!==listenerGeneration)return;
+normalLogs=parseLogs(snap.val());normalLoaded=true;renderAll();
+},console.error);
+testRef.on("value",snap=>{
+if(token!==listenerGeneration)return;
+testLogs=parseLogs(snap.val());testLoaded=true;renderAll();
+},console.error);
+}
+$("nodeSelect").addEventListener("change",()=>{
+currentNode=$("nodeSelect").value;
+attachListeners();
+});
+db.ref(".info/serverTimeOffset").on("value",s=>{
+serverOffset=Number(s.val())||0;updateLive();
+});
+db.ref(".info/connected").on("value",s=>{
+connected=s.val()===true;updateLive();
+});
+currentDay=dayKey();
+setInterval(()=>{
+updateLive();
+if(dayKey()!==currentDay){currentDay=dayKey();renderAll();}
+},5000);
 
-const FIREBASE_LOGIN_EMAIL =
-    "marnar@diagnostik-monitoring.example.com";
-
-const loginScreen =
-    document.getElementById("loginScreen");
-
-const dashboardApp =
-    document.getElementById("dashboardApp");
-
-const loginForm =
-    document.getElementById("loginForm");
-
-const loginUsername =
-    document.getElementById("loginUsername");
-
-const loginPassword =
-    document.getElementById("loginPassword");
-
-const loginButton =
-    document.getElementById("loginButton");
-
-const loginError =
-    document.getElementById("loginError");
-
-const humanCheck =
-    document.getElementById("humanCheck");
-
-
-humanCheck.addEventListener("change", () => {
-
-    loginButton.disabled = !humanCheck.checked;
-
+$("togglePassword").onclick=()=>{
+const p=$("loginPassword");
+p.type=p.type==="password"?"text":"password";
+$("togglePassword").textContent=p.type==="password"?"👁":"🙈";
+};
+$("humanCheck").onchange=()=>{
+$("loginButton").disabled=!$("humanCheck").checked;
+};
+$("loginForm").onsubmit=async e=>{
+e.preventDefault();
+$("loginError").textContent="";
+if($("loginUsername").value.trim().toLowerCase()!==LOGIN_USERNAME){
+$("loginError").textContent="Username atau password salah.";
+return;
+}
+$("loginButton").disabled=true;
+try{
+await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+await auth.signInWithEmailAndPassword(
+FIREBASE_LOGIN_EMAIL,$("loginPassword").value
+);
+}catch(err){
+console.error(err);
+$("loginError").textContent="Login gagal. Periksa username, password, dan konfigurasi Firebase Authentication.";
+}finally{
+$("loginButton").disabled=!$("humanCheck").checked;
+}
+};
+$("logoutButton").onclick=()=>auth.signOut();
+auth.onAuthStateChanged(user=>{
+if(user){
+$("loginScreen").style.display="none";
+$("dashboardApp").style.display="block";
+initCharts();attachListeners();
+}else{
+++listenerGeneration;detach();
+$("dashboardApp").style.display="none";
+$("loginScreen").style.display="flex";
+monitoring=null;monitoringLoaded=false;
+$("loginPassword").value="";
+$("humanCheck").checked=false;
+$("loginButton").disabled=true;
+}
 });
 
-
-document.getElementById("togglePassword")
-.addEventListener("click", () => {
-
-    if (loginPassword.type === "password") {
-
-        loginPassword.type = "text";
-
-    } else {
-
-        loginPassword.type = "password";
-
-    }
-
+// Membuat grafik Excel asli melalui struktur OOXML.
+function escapeXML(v){
+return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;")
+.replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function nativeChartXML(title,column,lastRow,index){
+const sheet="'Monitoring Ruang Operasi'";
+const cat=`${sheet}!$B$6:$B$${lastRow}`;
+const val=`${sheet}!$${column}$6:$${column}$${lastRow}`;
+const ax=100+index*2,ay=ax+1;
+const color=index===1?"3E2723":"D88DA8";
+return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart"
+xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+<c:chart><c:title><c:tx><c:rich><a:bodyPr/><a:lstStyle/>
+<a:p><a:r><a:rPr lang="id-ID"/><a:t>${escapeXML(title)}</a:t></a:r></a:p>
+</c:rich></c:tx></c:title>
+<c:plotArea><c:layout/><c:lineChart>
+<c:grouping val="standard"/><c:varyColors val="0"/>
+<c:ser><c:idx val="0"/><c:order val="0"/>
+<c:tx><c:v>${escapeXML(title)}</c:v></c:tx>
+<c:spPr><a:ln w="28575"><a:solidFill><a:srgbClr val="${color}"/></a:solidFill></a:ln></c:spPr>
+<c:marker><c:symbol val="circle"/><c:size val="5"/></c:marker>
+<c:cat><c:strRef><c:f>${escapeXML(cat)}</c:f></c:strRef></c:cat>
+<c:val><c:numRef><c:f>${escapeXML(val)}</c:f></c:numRef></c:val>
+<c:smooth val="0"/></c:ser>
+<c:axId val="${ax}"/><c:axId val="${ay}"/>
+</c:lineChart>
+<c:catAx><c:axId val="${ax}"/><c:scaling><c:orientation val="minMax"/></c:scaling>
+<c:axPos val="b"/><c:tickLblPos val="nextTo"/>
+<c:crossAx val="${ay}"/><c:crosses val="autoZero"/></c:catAx>
+<c:valAx><c:axId val="${ay}"/><c:scaling><c:orientation val="minMax"/></c:scaling>
+<c:axPos val="l"/><c:numFmt formatCode="0.0" sourceLinked="0"/>
+<c:tickLblPos val="nextTo"/><c:crossAx val="${ax}"/>
+<c:crosses val="autoZero"/></c:valAx>
+</c:plotArea><c:plotVisOnly val="1"/><c:dispBlanksAs val="gap"/>
+</c:chart></c:chartSpace>`;
+}
+async function insertNativeCharts(buffer,lastRow){
+const zip=await JSZip.loadAsync(buffer);
+const wsPath="xl/worksheets/sheet1.xml";
+let ws=await zip.file(wsPath).async("string");
+if(!ws.includes("xmlns:r=")){
+ws=ws.replace("<worksheet ","<worksheet xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" ");
+}
+ws=ws.replace("</worksheet>",'<drawing r:id="rIdChartDrawing"/></worksheet>');
+zip.file(wsPath,ws);
+const relPath="xl/worksheets/_rels/sheet1.xml.rels";
+let rel=zip.file(relPath)?
+await zip.file(relPath).async("string"):
+'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
+rel=rel.replace("</Relationships>",
+'<Relationship Id="rIdChartDrawing" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/></Relationships>');
+zip.file(relPath,rel);
+function anchor(id,start){
+return `<xdr:twoCellAnchor>
+<xdr:from><xdr:col>7</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${start}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>
+<xdr:to><xdr:col>18</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${start+14}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>
+<xdr:graphicFrame macro=""><xdr:nvGraphicFramePr>
+<xdr:cNvPr id="${id}" name="Grafik ${id}"/>
+<xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr>
+<xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm>
+<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart">
+<c:chart xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart"
+xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:id="rId${id}"/>
+</a:graphicData></a:graphic></xdr:graphicFrame>
+<xdr:clientData/></xdr:twoCellAnchor>`;
+}
+zip.file("xl/drawings/drawing1.xml",
+'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+'<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">'+
+anchor(1,1)+anchor(2,17)+"</xdr:wsDr>");
+zip.file("xl/drawings/_rels/drawing1.xml.rels",
+'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart1.xml"/>'+
+'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart2.xml"/>'+
+"</Relationships>");
+zip.file("xl/charts/chart1.xml",nativeChartXML("Grafik Suhu (°C)","C",lastRow,1));
+zip.file("xl/charts/chart2.xml",nativeChartXML("Grafik Kelembaban (%RH)","D",lastRow,2));
+let types=await zip.file("[Content_Types].xml").async("string");
+types=types.replace("</Types>",
+'<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>'+
+'<Override PartName="/xl/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>'+
+'<Override PartName="/xl/charts/chart2.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/></Types>');
+zip.file("[Content_Types].xml",types);
+return zip.generateAsync({type:"blob",compression:"DEFLATE"});
+}
+async function exportExcel(){
+const button=$("exportButton");
+const message=$("exportMessage");
+const month=$("exportMonth").value;
+const mode=$("exportMode").value;
+if(!/^\d{4}-\d{2}$/.test(month)){
+alert("Pilih bulan dan tahun terlebih dahulu.");return;
+}
+button.disabled=true;
+message.textContent="Mengambil data asli dari Firebase...";
+try{
+const path=currentNode+"/"+(mode==="test"?"LogDataPengujian":"LogData");
+const snap=await db.ref(path).once("value");
+const rows=parseLogs(snap.val()).filter(r=>dayKey(r.time).startsWith(month));
+if(!rows.length){
+message.textContent="Tidak ada data tersimpan untuk bulan dan jenis log ini.";
+return;
+}
+if(typeof ExcelJS==="undefined"||typeof JSZip==="undefined")
+throw new Error("Pustaka Excel gagal dimuat. Periksa internet.");
+const book=new ExcelJS.Workbook();
+book.creator="Monitoring Ruang Operasi";
+book.calcProperties.fullCalcOnLoad=true;
+const sheet=book.addWorksheet("Monitoring Ruang Operasi");
+sheet.columns=[
+{width:7},{width:23},{width:16},{width:23},
+{width:40},{width:18},{width:3}
+];
+sheet.mergeCells("A1:F1");
+sheet.getCell("A1").value="MONITORING RUANG OPERASI";
+sheet.getCell("A1").font={bold:true,size:16,color:{argb:"FF3E2723"}};
+sheet.mergeCells("A2:F2");
+sheet.getCell("A2").value=`${currentNode} | ${mode==="test"?"Pengujian":"Normal"} | ${month}`;
+sheet.mergeCells("A3:F3");
+sheet.getCell("A3").value="Data asli Firebase - Grafik terhubung dengan sel Excel";
+const header=sheet.getRow(5);
+header.values=["No","Waktu (WIB)","Suhu (°C)","Kelembaban (%RH)","Status Ruangan","Jenis Log"];
+header.font={bold:true,color:{argb:"FF3E2723"}};
+header.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFF4C9D6"}};
+rows.forEach((r,i)=>{
+sheet.addRow([
+i+1,formatWib(r.time),r.suhu,r.hum,r.status,
+mode==="test"?"Pengujian":"Normal"
+]);
 });
-
-
-loginForm.addEventListener("submit", async (event) => {
-
-    event.preventDefault();
-
-    loginError.textContent = "";
-
-    const username =
-        loginUsername.value.trim().toLowerCase();
-
-    if (username !== LOGIN_USERNAME) {
-
-        loginError.textContent =
-            "Username atau password salah.";
-
-        return;
-
-    }
-
-    if (!humanCheck.checked) {
-
-        loginError.textContent =
-            "Centang Saya bukan robot terlebih dahulu.";
-
-        return;
-
-    }
-
-    loginButton.disabled = true;
-
-    try {
-
-        await auth.setPersistence(
-            firebase.auth.Auth.Persistence.SESSION
-        );
-
-        await auth.signInWithEmailAndPassword(
-            FIREBASE_LOGIN_EMAIL,
-            loginPassword.value
-        );
-
-    } catch (error) {
-
-        console.error("Login gagal:", error);
-
-        loginError.textContent =
-            "Login gagal. Periksa username dan password.";
-
-    } finally {
-
-        loginButton.disabled = !humanCheck.checked;
-
-    }
-
-});
-
-
-document.getElementById("logoutButton")
-.addEventListener("click", () => {
-
-    auth.signOut();
-
-});
-
-
-/* =========================
-   VARIABEL GLOBAL
-========================= */
-
-let currentNode = "Hardware_1";
-
-let monitoringRef = null;
-
-let logRef = null;
-
-let tempChart = null;
-
-let humChart = null;
-
-let cachedLogs = [];
-
-let logRequestId = 0;
-
-
-/* =========================
-   FUNGSI BANTUAN
-========================= */
-
-function getLogNode(mode) {
-
-    return mode === "normal"
-        ? "LogDataNormal"
-        : "LogDataPengujian";
-
+sheet.autoFilter={from:"A5",to:"F5"};
+sheet.views=[{state:"frozen",ySplit:5}];
+for(let i=6;i<=rows.length+5;i++){
+sheet.getCell("C"+i).numFmt="0.0";
+sheet.getCell("D"+i).numFmt="0.0";
 }
-
-
-/*
-   Membaca tanggal dari format:
-   DD/MM/YYYY HH:mm:ss
-
-   Juga mendukung YYYY-MM-DD
-   dan timestamp numerik.
-*/
-
-function parseLogDate(value) {
-
-    if (value === null || value === undefined) {
-        return null;
-    }
-
-    if (typeof value === "number") {
-
-        const date = new Date(value);
-
-        return Number.isNaN(date.getTime())
-            ? null
-            : date;
-
-    }
-
-    const text = String(value).trim();
-
-    const indo = text.match(
-        /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/
-    );
-
-    if (indo) {
-
-        const date = new Date(
-            Number(indo[3]),
-            Number(indo[2]) - 1,
-            Number(indo[1]),
-            Number(indo[4] || 0),
-            Number(indo[5] || 0),
-            Number(indo[6] || 0)
-        );
-
-        if (
-            date.getFullYear() !== Number(indo[3]) ||
-            date.getMonth() !== Number(indo[2]) - 1 ||
-            date.getDate() !== Number(indo[1])
-        ) {
-            return null;
-        }
-
-        return date;
-
-    }
-
-    const iso = text.match(
-        /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/
-    );
-
-    if (iso) {
-
-        const date = new Date(
-            Number(iso[1]),
-            Number(iso[2]) - 1,
-            Number(iso[3]),
-            Number(iso[4] || 0),
-            Number(iso[5] || 0),
-            Number(iso[6] || 0)
-        );
-
-        if (
-            date.getFullYear() !== Number(iso[1]) ||
-            date.getMonth() !== Number(iso[2]) - 1 ||
-            date.getDate() !== Number(iso[3])
-        ) {
-            return null;
-        }
-
-        return date;
-
-    }
-
-    return null;
-
+message.textContent="Membuat workbook dan grafik Excel...";
+const bytes=await book.xlsx.writeBuffer();
+const blob=await insertNativeCharts(bytes,rows.length+5);
+const url=URL.createObjectURL(blob);
+const a=document.createElement("a");
+a.href=url;
+a.download=`Monitoring_${currentNode}_${mode}_${month}.xlsx`;
+document.body.appendChild(a);a.click();a.remove();
+setTimeout(()=>URL.revokeObjectURL(url),10000);
+message.textContent=`File dibuat dari ${rows.length} catatan asli. Periksa grafik di Microsoft Excel.`;
+}catch(err){
+console.error(err);
+message.textContent="Gagal membuat Excel: "+err.message;
+}finally{button.disabled=false;}
 }
-
-
-function dateKey(date) {
-
-    if (!date) return "";
-
-    const year = date.getFullYear();
-
-    const month =
-        String(date.getMonth() + 1).padStart(2, "0");
-
-    const day =
-        String(date.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
-
-}
-
-
-function monthKey(date) {
-
-    if (!date) return "";
-
-    return dateKey(date).slice(0, 7);
-
-}
-
-
-function formatChartLabel(row, showDate) {
-
-    if (!row.date) {
-        return row.Waktu || "-";
-    }
-
-    const day = String(
-        row.date.getDate()
-    ).padStart(2, "0");
-
-    const month = String(
-        row.date.getMonth() + 1
-    ).padStart(2, "0");
-
-    const hours = String(
-        row.date.getHours()
-    ).padStart(2, "0");
-
-    const minutes = String(
-        row.date.getMinutes()
-    ).padStart(2, "0");
-
-    if (showDate) {
-
-        return `${day}/${month} ${hours}:${minutes}`;
-
-    }
-
-    return `${hours}:${minutes}`;
-
-}
-
-
-function normalizeLogs(raw) {
-
-    if (!raw || typeof raw !== "object") {
-        return [];
-    }
-
-    const result = [];
-
-    Object.entries(raw).forEach(([key, value]) => {
-
-        if (
-            !value ||
-            typeof value !== "object" ||
-            Array.isArray(value)
-        ) {
-            return;
-        }
-
-        const suhu = Number(value.Suhu);
-
-        const hum = Number(value.Kelembaban);
-
-        if (
-            !Number.isFinite(suhu) ||
-            !Number.isFinite(hum) ||
-            value.Suhu === null ||
-            value.Kelembaban === null ||
-            value.Suhu === undefined ||
-            value.Kelembaban === undefined
-        ) {
-            return;
-        }
-
-        const waktu =
-            value.Waktu || value.waktu || "";
-
-        const date =
-            parseLogDate(waktu) ||
-            parseLogDate(value.Timestamp) ||
-            parseLogDate(value.timestamp);
-
-        result.push({
-
-            key: key,
-
-            Waktu: waktu,
-
-            Suhu: suhu,
-
-            Kelembaban: hum,
-
-            Status: value.Status || "-",
-
-            date: date
-
-        });
-
-    });
-
-    result.sort((a, b) => {
-
-        if (a.date && b.date) {
-            return a.date - b.date;
-        }
-
-        if (a.date) return -1;
-
-        if (b.date) return 1;
-
-        return String(a.key).localeCompare(
-            String(b.key)
-        );
-
-    });
-
-    return result;
-
-}
-
-
-/* =========================
-   MEMBUAT GRAFIK
-========================= */
-
-function createChart(canvasId, title, color, min, max) {
-
-    const ctx =
-        document.getElementById(canvasId);
-
-    return new Chart(ctx, {
-
-        type: "line",
-
-        data: {
-
-            labels: [],
-
-            datasets: [{
-
-                label: title,
-
-                data: [],
-
-                borderColor: color,
-
-                backgroundColor: color + "22",
-
-                borderWidth: 3,
-
-                tension: 0.25,
-
-                fill: true,
-
-                pointRadius: 3,
-
-                pointHoverRadius: 5
-
-            }]
-
-        },
-
-        options: {
-
-            responsive: true,
-
-            maintainAspectRatio: true,
-
-            interaction: {
-
-                mode: "index",
-
-                intersect: false
-
-            },
-
-            plugins: {
-
-                legend: {
-                    display: true
-                }
-
-            },
-
-            scales: {
-
-                x: {
-
-                    ticks: {
-
-                        maxRotation: 0,
-
-                        autoSkip: true,
-
-                        maxTicksLimit: 8
-
-                    }
-
-                },
-
-                y: {
-
-                    min: min,
-
-                    max: max
-
-                }
-
-            }
-
-        }
-
-    });
-
-}
-
-
-function initCharts() {
-
-    if (tempChart || humChart) {
-        return;
-    }
-
-    tempChart = createChart(
-        "tempChart",
-        "Suhu (°C)",
-        "#6E1E3B",
-        18,
-        32
-    );
-
-    humChart = createChart(
-        "humChart",
-        "Kelembaban (%RH)",
-        "#EAB0C8",
-        30,
-        90
-    );
-
-}
-
-
-/* =========================
-   SKALA GRAFIK OTOMATIS
-========================= */
-
-function updateScale(chart, values, type) {
-
-    if (!values.length) {
-
-        chart.options.scales.y.min =
-            type === "temp" ? 18 : 30;
-
-        chart.options.scales.y.max =
-            type === "temp" ? 32 : 90;
-
-        return;
-
-    }
-
-    const minValue = Math.min(...values);
-
-    const maxValue = Math.max(...values);
-
-    const padding =
-        type === "temp"
-            ? Math.max(1, (maxValue - minValue) * 0.2)
-            : Math.max(3, (maxValue - minValue) * 0.2);
-
-    chart.options.scales.y.min =
-        Math.floor(minValue - padding);
-
-    chart.options.scales.y.max =
-        Math.ceil(maxValue + padding);
-
-    if (type === "hum") {
-
-        chart.options.scales.y.min = Math.max(
-            0,
-            chart.options.scales.y.min
-        );
-
-        chart.options.scales.y.max = Math.min(
-            100,
-            chart.options.scales.y.max
-        );
-
-    }
-
-}
-
-
-/* =========================
-   UPDATE GRAFIK DARI LOG
-========================= */
-
-function updateCharts() {
-
-    if (!tempChart || !humChart) {
-        return;
-    }
-
-    const range =
-        document.getElementById("chartRange").value;
-
-    const selectedDate =
-        document.getElementById("chartDate").value;
-
-    const filtered = cachedLogs.filter(row => {
-
-        if (range === "all") {
-            return true;
-        }
-
-        return dateKey(row.date) === selectedDate;
-
-    });
-
-    const labels = filtered.map(row => {
-
-        return formatChartLabel(
-            row,
-            range === "all"
-        );
-
-    });
-
-    const suhu = filtered.map(row => row.Suhu);
-
-    const hum = filtered.map(row => row.Kelembaban);
-
-    tempChart.data.labels = labels;
-
-    tempChart.data.datasets[0].data = suhu;
-
-    humChart.data.labels = labels;
-
-    humChart.data.datasets[0].data = hum;
-
-    updateScale(tempChart, suhu, "temp");
-
-    updateScale(humChart, hum, "hum");
-
-    tempChart.update();
-
-    humChart.update();
-
-    const mode =
-        document.getElementById("chartMode").value;
-
-    const label =
-        mode === "normal"
-            ? "normal"
-            : "pengujian";
-
-    document.getElementById("chartInfo").textContent =
-        filtered.length > 0
-            ? `Menampilkan ${filtered.length} catatan ${label} dari Firebase.`
-            : `Belum ada catatan ${label} untuk pilihan tanggal ini.`;
-
-}
-
-
-/* =========================
-   TABEL LOG
-========================= */
-
-function updateLogTable() {
-
-    const tbody =
-        document.getElementById("logTableBody");
-
-    tbody.innerHTML = "";
-
-    if (!cachedLogs.length) {
-
-        const row = tbody.insertRow();
-
-        const cell = row.insertCell();
-
-        cell.colSpan = 4;
-
-        cell.textContent =
-            "Belum ada data log tersimpan.";
-
-        return;
-
-    }
-
-    const latest = cachedLogs.slice().reverse();
-
-    latest.forEach(item => {
-
-        const row = tbody.insertRow();
-
-        const waktu = row.insertCell();
-
-        const suhu = row.insertCell();
-
-        const hum = row.insertCell();
-
-        const status = row.insertCell();
-
-        waktu.textContent = item.Waktu || "-";
-
-        suhu.textContent = item.Suhu.toFixed(1);
-
-        hum.textContent =
-            item.Kelembaban.toFixed(1);
-
-        const tag = document.createElement("span");
-
-        tag.className = "status-tag";
-
-        tag.textContent = item.Status;
-
-        tag.style.background =
-            item.Status === "NORMAL"
-                ? "var(--green)"
-                : "var(--red)";
-
-        status.appendChild(tag);
-
-    });
-
-}
-
-
-/* =========================
-   MONITORING REALTIME
-========================= */
-
-function attachMonitoring() {
-
-    if (monitoringRef) {
-
-        monitoringRef.off();
-
-    }
-
-    document.getElementById("valSuhu").textContent =
-        "--";
-
-    document.getElementById("valHum").textContent =
-        "--";
-
-    document.getElementById("syncTime").textContent =
-        "--";
-
-    const banner =
-        document.getElementById("statusBanner");
-
-    banner.textContent =
-        "MENUNGGU DATA " + currentNode;
-
-    banner.style.background = "var(--rose)";
-
-    banner.style.color = "var(--plum)";
-
-    monitoringRef = db.ref(
-        currentNode + "/Monitoring"
-    );
-
-    monitoringRef.on("value", snapshot => {
-
-        const data = snapshot.val();
-
-        if (!data) {
-            return;
-        }
-
-        const suhu = Number(data.Suhu);
-
-        const hum = Number(data.Kelembaban);
-
-        document.getElementById("valSuhu").textContent =
-            data.Suhu !== undefined &&
-            data.Suhu !== null &&
-            Number.isFinite(suhu)
-                ? suhu.toFixed(1)
-                : "--";
-
-        document.getElementById("valHum").textContent =
-            data.Kelembaban !== undefined &&
-            data.Kelembaban !== null &&
-            Number.isFinite(hum)
-                ? hum.toFixed(1)
-                : "--";
-
-        document.getElementById("syncTime").textContent =
-            data.Waktu || "--";
-
-        const status =
-            String(data.Status || "MEMBACA SENSOR...");
-
-        banner.textContent = status;
-
-        if (status === "NORMAL") {
-
-            banner.style.background = "var(--green)";
-
-            banner.style.color = "white";
-
-        } else if (status === "SENSOR ERROR") {
-
-            banner.style.background = "#8E24AA";
-
-            banner.style.color = "white";
-
-        } else if (status.includes("TIDAK NORMAL")) {
-
-            banner.style.background = "var(--red)";
-
-            banner.style.color = "white";
-
-        } else {
-
-            banner.style.background = "var(--orange)";
-
-            banner.style.color = "white";
-
-        }
-
-        /*
-           PENTING:
-
-           Tidak ada perintah menambah data grafik
-           di sini.
-
-           Monitoring tetap realtime, tetapi
-           grafik hanya diperbarui dari log.
-        */
-
-    }, error => {
-
-        console.error(
-            "Monitoring Firebase gagal:",
-            error
-        );
-
-        banner.textContent =
-            "GAGAL MEMBACA MONITORING FIREBASE";
-
-        banner.style.background = "var(--red)";
-
-        banner.style.color = "white";
-
-    });
-
-}
-
-
-/* =========================
-   LISTENER LOG GRAFIK
-========================= */
-
-function attachLogListener() {
-
-    if (logRef) {
-
-        logRef.off();
-
-        logRef = null;
-
-    }
-
-    const requestId = ++logRequestId;
-
-    cachedLogs = [];
-
-    updateCharts();
-
-    updateLogTable();
-
-    const mode =
-        document.getElementById("chartMode").value;
-
-    const path =
-        currentNode + "/" + getLogNode(mode);
-
-    logRef = db.ref(path);
-
-    logRef.on("value", snapshot => {
-
-        if (requestId !== logRequestId) {
-            return;
-        }
-
-        cachedLogs = normalizeLogs(
-            snapshot.val()
-        );
-
-        updateCharts();
-
-        updateLogTable();
-
-    }, error => {
-
-        if (requestId !== logRequestId) {
-            return;
-        }
-
-        console.error(
-            "Gagal membaca log:",
-            error
-        );
-
-        document.getElementById("chartInfo")
-        .textContent =
-            "Gagal membaca log Firebase. Periksa izin database.";
-
-    });
-
-}
-
-
-/* =========================
-   FILTER GRAFIK
-========================= */
-
-function updateDateFilter() {
-
-    const range =
-        document.getElementById("chartRange").value;
-
-    document.getElementById("dateFilterWrap")
-    .style.display =
-        range === "date" ? "flex" : "none";
-
-    updateCharts();
-
-}
-
-
-document.getElementById("chartMode")
-.addEventListener("change", () => {
-
-    attachLogListener();
-
-});
-
-
-document.getElementById("chartRange")
-.addEventListener("change", updateDateFilter);
-
-
-document.getElementById("chartDate")
-.addEventListener("change", updateCharts);
-
-
-/* =========================
-   PILIH HARDWARE
-========================= */
-
-document.getElementById("nodeSelect")
-.addEventListener("change", event => {
-
-    currentNode = event.target.value;
-
-    attachMonitoring();
-
-    attachLogListener();
-
-});
-
-
-/* =========================
-   EKSPOR EXCEL
-========================= */
-
-/*
-   Grafik Excel dibuat sebagai gambar PNG
-   dari data bulan yang dipilih.
-
-   Data angkanya tetap tersimpan
-   sebagai sel Excel.
-*/
-
-function createExportChartImage(
-    rows,
-    field,
-    title,
-    color
-) {
-
-    const canvas = document.createElement("canvas");
-
-    canvas.width = 1200;
-
-    canvas.height = 500;
-
-    const ctx = canvas.getContext("2d");
-
-    const chart = new Chart(ctx, {
-
-        type: "line",
-
-        data: {
-
-            labels: rows.map(row => {
-
-                return formatChartLabel(row, true);
-
-            }),
-
-            datasets: [{
-
-                label: title,
-
-                data: rows.map(row => row[field]),
-
-                borderColor: color,
-
-                backgroundColor: color + "22",
-
-                borderWidth: 3,
-
-                pointRadius: rows.length > 100 ? 0 : 2,
-
-                tension: 0.15,
-
-                fill: false
-
-            }]
-
-        },
-
-        options: {
-
-            responsive: false,
-
-            animation: false,
-
-            plugins: {
-
-                legend: {
-                    display: true
-                },
-
-                title: {
-
-                    display: true,
-
-                    text: title,
-
-                    font: {
-                        size: 20
-                    }
-
-                }
-
-            },
-
-            scales: {
-
-                x: {
-
-                    ticks: {
-
-                        autoSkip: true,
-
-                        maxTicksLimit: 12
-
-                    }
-
-                }
-
-            }
-
-        }
-
-    });
-
-    chart.update("none");
-
-    const image = canvas.toDataURL("image/png");
-
-    chart.destroy();
-
-    return image;
-
-}
-
-
-/* =========================
-   DOWNLOAD EXCEL
-========================= */
-
-async function downloadExcel() {
-
-    const button =
-        document.getElementById("downloadExcelButton");
-
-    const mode =
-        document.getElementById("exportMode").value;
-
-    const month =
-        document.getElementById("exportMonth").value;
-
-    if (!month) {
-
-        alert("Pilih bulan dan tahun terlebih dahulu.");
-
-        return;
-
-    }
-
-    if (typeof ExcelJS === "undefined") {
-
-        alert(
-            "Pustaka Excel belum termuat. Periksa koneksi internet."
-        );
-
-        return;
-
-    }
-
-    const originalText = button.textContent;
-
-    button.disabled = true;
-
-    button.textContent = "MEMBUAT EXCEL...";
-
-    try {
-
-        const path =
-            currentNode + "/" + getLogNode(mode);
-
-        /*
-           Membaca ulang log sesuai pilihan ekspor.
-
-           Pilihan ekspor tidak bergantung
-           pada mode grafik yang sedang dibuka.
-        */
-
-        const snapshot = await db.ref(path).once("value");
-
-        const allRows = normalizeLogs(
-            snapshot.val()
-        );
-
-        const rows = allRows.filter(row => {
-
-            return monthKey(row.date) === month;
-
-        });
-
-        if (!rows.length) {
-
-            alert(
-                "Belum ada data " +
-                mode +
-                " untuk bulan " +
-                month +
-                "."
-            );
-
-            return;
-
-        }
-
-        const workbook = new ExcelJS.Workbook();
-
-        workbook.creator =
-            "Monitoring Ruang Operasi";
-
-        workbook.created = new Date();
-
-
-        /* =========================
-           SHEET DATA
-        ========================= */
-
-        const dataSheet =
-            workbook.addWorksheet("Data Pengukuran");
-
-        dataSheet.columns = [
-
-            {
-                header: "No",
-                key: "no",
-                width: 8
-            },
-
-            {
-                header: "Tanggal",
-                key: "tanggal",
-                width: 16
-            },
-
-            {
-                header: "Waktu",
-                key: "waktu",
-                width: 16
-            },
-
-            {
-                header: "Suhu (°C)",
-                key: "suhu",
-                width: 16
-            },
-
-            {
-                header: "Kelembaban (%RH)",
-                key: "kelembaban",
-                width: 22
-            },
-
-            {
-                header: "Status Ruangan",
-                key: "status",
-                width: 42
-            }
-
-        ];
-
-        rows.forEach((item, index) => {
-
-            const date = item.date;
-
-            dataSheet.addRow({
-
-                no: index + 1,
-
-                tanggal: dateKey(date),
-
-                waktu: date
-                    ? date.toLocaleTimeString(
-                        "id-ID",
-                        { hour12: false }
-                      )
-                    : "",
-
-                suhu: item.Suhu,
-
-                kelembaban: item.Kelembaban,
-
-                status: item.Status
-
-            });
-
-        });
-
-        dataSheet.getRow(1).font = {
-
-            bold: true,
-
-            color: {
-                argb: "FFFFFFFF"
-            }
-
-        };
-
-        dataSheet.getRow(1).fill = {
-
-            type: "pattern",
-
-            pattern: "solid",
-
-            fgColor: {
-                argb: "FF6E1E3B"
-            }
-
-        };
-
-        dataSheet.getRow(1).alignment = {
-
-            vertical: "middle"
-
-        };
-
-        dataSheet.getRow(1).height = 24;
-
-        dataSheet.autoFilter = {
-
-            from: "A1",
-
-            to: "F1"
-
-        };
-
-        dataSheet.views = [{
-
-            state: "frozen",
-
-            ySplit: 1
-
-        }];
-
-
-        /* =========================
-           SHEET GRAFIK SUHU
-        ========================= */
-
-        const tempSheet =
-            workbook.addWorksheet("Grafik Suhu");
-
-        tempSheet.getCell("A1").value =
-            "GRAFIK SUHU RUANG OPERASI";
-
-        tempSheet.getCell("A2").value =
-            "Jenis data: " + mode;
-
-        tempSheet.getCell("A3").value =
-            "Periode: " + month;
-
-        tempSheet.getCell("A4").value =
-            "Jumlah data: " + rows.length;
-
-        const tempImage = createExportChartImage(
-
-            rows,
-
-            "Suhu",
-
-            "Grafik Suhu (°C)",
-
-            "#6E1E3B"
-
-        );
-
-        const tempImageId = workbook.addImage({
-
-            base64: tempImage,
-
-            extension: "png"
-
-        });
-
-        tempSheet.addImage(tempImageId, {
-
-            tl: {
-                col: 0,
-                row: 5
-            },
-
-            ext: {
-                width: 1000,
-                height: 420
-            }
-
-        });
-
-
-        /* =========================
-           SHEET GRAFIK KELEMBABAN
-        ========================= */
-
-        const humSheet =
-            workbook.addWorksheet("Grafik Kelembaban");
-
-        humSheet.getCell("A1").value =
-            "GRAFIK KELEMBABAN RUANG OPERASI";
-
-        humSheet.getCell("A2").value =
-            "Jenis data: " + mode;
-
-        humSheet.getCell("A3").value =
-            "Periode: " + month;
-
-        humSheet.getCell("A4").value =
-            "Jumlah data: " + rows.length;
-
-        const humImage = createExportChartImage(
-
-            rows,
-
-            "Kelembaban",
-
-            "Grafik Kelembaban (%RH)",
-
-            "#EAB0C8"
-
-        );
-
-        const humImageId = workbook.addImage({
-
-            base64: humImage,
-
-            extension: "png"
-
-        });
-
-        humSheet.addImage(humImageId, {
-
-            tl: {
-                col: 0,
-                row: 5
-            },
-
-            ext: {
-                width: 1000,
-                height: 420
-            }
-
-        });
-
-
-        /* =========================
-           SIMPAN FILE XLSX
-        ========================= */
-
-        const buffer =
-            await workbook.xlsx.writeBuffer();
-
-        const blob = new Blob(
-
-            [buffer],
-
-            {
-                type:
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            }
-
-        );
-
-        const url =
-            URL.createObjectURL(blob);
-
-        const link =
-            document.createElement("a");
-
-        link.href = url;
-
-        link.download =
-            "Monitoring_" +
-            currentNode +
-            "_" +
-            mode +
-            "_" +
-            month +
-            ".xlsx";
-
-        document.body.appendChild(link);
-
-        link.click();
-
-        document.body.removeChild(link);
-
-        setTimeout(() => {
-
-            URL.revokeObjectURL(url);
-
-        }, 1000);
-
-    } catch (error) {
-
-        console.error(
-            "Gagal membuat Excel:",
-            error
-        );
-
-        alert(
-            "Gagal membuat Excel. " +
-            "Periksa koneksi Firebase dan konsol browser."
-        );
-
-    } finally {
-
-        button.disabled = false;
-
-        button.textContent = originalText;
-
-    }
-
-}
-
-
-document.getElementById("downloadExcelButton")
-.addEventListener("click", downloadExcel);
-
-
-/* =========================
-   LOGIN STATUS
-========================= */
-
-auth.onAuthStateChanged(user => {
-
-    if (user) {
-
-        loginScreen.style.display = "none";
-
-        dashboardApp.style.display = "block";
-
-        initCharts();
-
-        attachMonitoring();
-
-        attachLogListener();
-
-        updateDateFilter();
-
-    } else {
-
-        if (monitoringRef) {
-
-            monitoringRef.off();
-
-            monitoringRef = null;
-
-        }
-
-        if (logRef) {
-
-            logRef.off();
-
-            logRef = null;
-
-        }
-
-        logRequestId++;
-
-        cachedLogs = [];
-
-        dashboardApp.style.display = "none";
-
-        loginScreen.style.display = "flex";
-
-        loginUsername.value = "";
-
-        loginPassword.value = "";
-
-        humanCheck.checked = false;
-
-        loginButton.disabled = true;
-
-    }
-
-});
-
-
-/* =========================
-   TANGGAL DEFAULT
-========================= */
-
-(function initializeDates() {
-
-    const now = new Date();
-
-    const year = now.getFullYear();
-
-    const month = String(
-        now.getMonth() + 1
-    ).padStart(2, "0");
-
-    document.getElementById("chartDate").value =
-        dateKey(now);
-
-    document.getElementById("exportMonth").value =
-        `${year}-${month}`;
-
-})();
+$("exportButton").addEventListener("click",exportExcel);
+$("exportMonth").value=dayKey().slice(0,7);
 
 </script>
-
 </body>
 </html>
