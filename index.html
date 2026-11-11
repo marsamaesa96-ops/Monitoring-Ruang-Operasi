@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -633,7 +632,7 @@ td {
     <div class="control">
       <label for="exportMode">Jenis Log Data</label>
       <select id="exportMode">
-        <option value="normal">LogDataNormal (3 Waktu)</option>
+        <option value="normal">LogDataNormal / LogData (3 Waktu)</option>
         <option value="test">LogDataPengujian (5 Menit)</option>
       </select>
     </div>
@@ -696,6 +695,9 @@ const $ = id => document.getElementById(id);
 let currentNode = "Hardware_1";
 let monitoring = null;
 let normalLogs = [];
+let normalLegacyLogs = [];
+let normalCurrentLogs = [];
+let hourlyLogs = [];
 let testLogs = [];
 
 let monitoringLoaded = false;
@@ -703,7 +705,9 @@ let normalLoaded = false;
 let testLoaded = false;
 
 let monitoringRef = null;
-let normalRef = null;
+let normalRef = null;       // LogData (riwayat lama)
+let normalCurrentRef = null; // LogDataNormal (baru)
+let hourlyRef = null;       // LogGrafikPerJam
 let testRef = null;
 
 let tempChart = null;
@@ -966,6 +970,23 @@ function activeRows() {
     : normalLogs;
 }
 
+// Mode normal: pakai satu data tiap jam jika sudah tersedia.
+// Hari sebelum V15 tetap dapat dilihat melalui log normal lama.
+function chartRows() {
+  if (graphMode() === "test") return todayRows(testLogs);
+  const savedHourly = todayRows(hourlyLogs);
+  return savedHourly.length ? savedHourly : todayRows(normalLogs);
+}
+
+// Satukan LogData lama dan LogDataNormal baru tanpa menghapus apa pun.
+function combineNormalLogs() {
+  const map = new Map();
+  for (const r of normalLegacyLogs) map.set(r.time.getTime(), r);
+  for (const r of normalCurrentLogs) map.set(r.time.getTime(), r);
+  normalLogs = [...map.values()].sort((a,b) => a.time - b.time);
+  renderAll();
+}
+
 function timeX(date) {
   const p = wibParts(date);
 
@@ -1134,7 +1155,7 @@ function renderCharts() {
   if (!tempChart) return;
 
   const mode = graphMode();
-  const rows = todayRows(activeRows());
+  const rows = chartRows();
 
   $("modeLabel").textContent =
     mode === "test"
@@ -1162,7 +1183,7 @@ function renderCharts() {
 
   $("chartMessage").textContent =
     rows.length
-      ? `Menampilkan ${rows.length} catatan asli hari ini.`
+      ? `Menampilkan ${rows.length} pengukuran asli hari ini (${mode === "test" ? "pengujian" : "grafik per jam / log lama"}).`
       : "Belum ada data pengukuran tersimpan untuk hari ini pada mode ini.";
 }
 
@@ -1263,13 +1284,15 @@ function renderAll() {
 
 function detach() {
   for (const ref of [
-    monitoringRef,normalRef,testRef
+    monitoringRef,normalRef,normalCurrentRef,hourlyRef,testRef
   ]) {
     if (ref) ref.off();
   }
 
   monitoringRef = null;
   normalRef = null;
+  normalCurrentRef = null;
+  hourlyRef = null;
   testRef = null;
 }
 
@@ -1280,6 +1303,9 @@ function attachListeners() {
 
   monitoring = null;
   normalLogs = [];
+  normalLegacyLogs = [];
+  normalCurrentLogs = [];
+  hourlyLogs = [];
   testLogs = [];
 
   monitoringLoaded = false;
@@ -1295,6 +1321,12 @@ function attachListeners() {
 
   normalRef = db.ref(
     currentNode + "/LogData"
+  );
+  normalCurrentRef = db.ref(
+    currentNode + "/LogDataNormal"
+  );
+  hourlyRef = db.ref(
+    currentNode + "/LogGrafikPerJam"
   );
 
   testRef = db.ref(
@@ -1318,12 +1350,24 @@ function attachListeners() {
   normalRef.on("value", snapshot => {
     if (token !== listenerGeneration) return;
 
-    normalLogs = parseLogs(snapshot.val());
+    normalLegacyLogs = parseLogs(snapshot.val());
     normalLoaded = true;
-    renderAll();
+    combineNormalLogs();
   }, error => {
-    console.error("Log normal:",error);
+    console.error("Log normal lama:",error);
   });
+
+  normalCurrentRef.on("value", snapshot => {
+    if (token !== listenerGeneration) return;
+    normalCurrentLogs = parseLogs(snapshot.val());
+    combineNormalLogs();
+  }, error => console.error("LogDataNormal:", error));
+
+  hourlyRef.on("value", snapshot => {
+    if (token !== listenerGeneration) return;
+    hourlyLogs = parseLogs(snapshot.val());
+    renderCharts();
+  }, error => console.error("LogGrafikPerJam:", error));
 
   testRef.on("value", snapshot => {
     if (token !== listenerGeneration) return;
@@ -1672,17 +1716,23 @@ async function exportExcel() {
     "Mengambil data asli dari Firebase...";
 
   try {
-    const path = currentNode + "/" +
-      (mode === "test"
-        ? "LogDataPengujian"
-        : "LogData");
+    // Ambil data normal lama DAN baru; jenis pengujian tetap node sendiri.
+    let rowsAll;
+    if (mode === "test") {
+      const snap = await db.ref(currentNode + "/LogDataPengujian").once("value");
+      rowsAll = parseLogs(snap.val());
+    } else {
+      const [legacy, current] = await Promise.all([
+        db.ref(currentNode + "/LogData").once("value"),
+        db.ref(currentNode + "/LogDataNormal").once("value")
+      ]);
+      const map = new Map();
+      for (const r of parseLogs(legacy.val())) map.set(r.time.getTime(), r);
+      for (const r of parseLogs(current.val())) map.set(r.time.getTime(), r);
+      rowsAll = [...map.values()].sort((a,b) => a.time - b.time);
+    }
 
-    const snapshot = await db.ref(path).once("value");
-
-    const rows = parseLogs(snapshot.val())
-      .filter(r =>
-        dayKey(r.time).startsWith(month)
-      );
+    const rows = rowsAll.filter(r => dayKey(r.time).startsWith(month));
 
     if (!rows.length) {
       message.textContent =
